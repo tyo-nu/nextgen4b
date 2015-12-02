@@ -1,8 +1,9 @@
 A set of scripts to manipulate and process .fastq files from next-generation sequencing experiments. The workflow is generally as follows.
 
 # Get all your .fastq files into one folder
-We typically use a MiSeq, which generates 
-Getting files from BaseSpace folder format to all sequences in one directory:
+We typically use a MiSeq, which generates .fastq.gz files in individual folders.
+
+Getting files from BaseSpace folder format to all sequences in one directory on Windows:
 
 	for /r %i in (*.fastq.gz) do @move "%i" .
 
