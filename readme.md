@@ -20,7 +20,7 @@ Nextgen_main.py usage:
 
 	python nextgen_main.py [samples.yaml]
 
-Note: For this code to run correctly, you need a modified AlignIO module that reads the alignment score into the Alignment object's 'annotations' field.
+Note: For this code to run correctly, you need a modified AlignIO module that reads the alignment score into the Alignment object's 'annotations' field. This is addressed here: https://github.com/biopython/biopython/pull/692
 
 This will generate a whole bunch of .csv's, one for each experiment in each run. Each .csv should have information about the observed reads at each position on the template supplied in the **experiment** entry in the YAML file.
 
