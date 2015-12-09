@@ -21,9 +21,8 @@ logging.basicConfig(filename='ngs_'+timestr+'.log',
 
 def runAllExperiments(yfname, save_intermediates=True):
     # Load YAML file
-    expt_f = open(yfname)
-    expt_yaml = yaml.load(expt_f) # Should probably make this a class at some point...
-    expt_f.close()
+    with open(yfname) as expt_f:
+        expt_yaml = yaml.load(expt_f) # Should probably make this a class at some point...
     logging.info('Loaded YAML experiment file '+yfname)
     
     runs = expt_yaml['ngsruns']
