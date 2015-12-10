@@ -87,10 +87,17 @@ def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIn
         # Assumes the first RE in fREs will terminate the copied sequence
         # copiedFuncGenerator's output should return all sequence before the adapter
         seqs = filterPEMismatches(bcSeqs[expt], peSeqs, copiedFunctionGenerator(fREs))
-        seqs = seqLenFilter(seqs, l_barcode=len(bcs[expt])) # Length Filtering
+        # seqs = seqLenFilter(seqs, l_barcode=len(bcs[expt])) # Length Filtering
+        
+        # Experimenting with looking at short sequences
+        seqs = seqLenFilter(seqs, u_cutoff=60, l_cutoff=20, l_barcode=len(bcs[expt]))
+        
         seqs = qualityFilter(seqs) # Quality Filtering (needs to only have copied sequence)
         seqs = stripForwardBarcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
-        seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+        # seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+        
+        # short seqs again
+        seqs = alignfilter.alignmentFilter(seqs, templates[expt], lo_cutoff=100, hi_cutoff=500)
         bcSeqs[expt] = seqs
         
     return bcSeqs
@@ -227,10 +234,10 @@ def qualityFilter(seqs, q_cutoff=20):
 # Length Filtering
 #####################
 
-def seqLenFilter(seqs, l_cutoff=70, l_barcode=0):
+def seqLenFilter(seqs, l_cutoff=70, u_cutoff=200, l_barcode=0):
     logging.info('Started Length Filtering')
     
-    l = [s for s in seqs if len(s.seq) >= (l_cutoff + l_barcode)]
+    l = [s for s in seqs if (len(s.seq) >= (l_cutoff + l_barcode)) and (len(s.seq) <= (u_cutoff + l_barcode)) ]
     
     logging.info('Finished Length Filtering. Kept %i of %i sequences.' % (len(l), len(seqs)))
     return l

@@ -8,7 +8,8 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Emboss.Applications import NeedleCommandline
 
-def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi_cutoff=1000):
+def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi_cutoff=1000,
+                    cleanup=True):
     logging.info('Started alignment-based filtering')
     start_nSeqs = len(seqs)
     
@@ -44,10 +45,11 @@ def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi
     newSeqs = cullAlignments(alnData, lo_cutoff=lo_cutoff, hi_cutoff=hi_cutoff)
         
     # Clean up temp files
-    logging.info('Cleaning up temp files')
-    os.remove(template_fname)
-    os.remove(seqs_fname)
-    os.remove(ofilen)
+    if cleanup:
+        logging.info('Cleaning up temp files')
+        os.remove(template_fname)
+        os.remove(seqs_fname)
+        os.remove(ofilen)
     
     # Return
     logging.info('Finished alignment-based filtering. Kept %i of %i sequences.' % (len(newSeqs), start_nSeqs))
