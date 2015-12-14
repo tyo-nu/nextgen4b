@@ -90,14 +90,15 @@ def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIn
         # seqs = seqLenFilter(seqs, l_barcode=len(bcs[expt])) # Length Filtering
         
         # Experimenting with looking at short sequences
-        seqs = seqLenFilter(seqs, u_cutoff=60, l_cutoff=20, l_barcode=len(bcs[expt]))
+        seqs = seqLenFilter(seqs, u_cutoff=70, l_cutoff=20, l_barcode=len(bcs[expt]))
         
         seqs = qualityFilter(seqs) # Quality Filtering (needs to only have copied sequence)
         seqs = stripForwardBarcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
         # seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
         
         # short seqs again
-        seqs = alignfilter.alignmentFilter(seqs, templates[expt], lo_cutoff=100, hi_cutoff=500)
+        seqs = alignfilter.alignmentFilter(
+            seqs, templates[expt], lo_cutoff=100, hi_cutoff=500, cleanup=False)
         bcSeqs[expt] = seqs
         
     return bcSeqs
