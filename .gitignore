@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# PyCharm?
+.idea
+
 # Distribution / packaging
 .Python
 env/
@@ -107,3 +110,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+*.iml
