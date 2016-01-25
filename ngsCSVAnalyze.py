@@ -105,7 +105,8 @@ def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
     csv_fnames = getAllCsvFileNames(directory=directory)
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
     
-    f_ids = ['.'.join([str(x) for x in getExpRunData(fname)]) for fname in csv_fnames]
+    # Set ids to be run first, then experiment
+    f_ids = ['.'.join(reversed([str(x) for x in getExpRunData(fname)]) for fname in csv_fnames]
     
     # eeek this is a hack... wish there were a way to append using the correct columns
     # rather than just use .values and assume the columns are in the same order.
