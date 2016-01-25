@@ -99,7 +99,7 @@ def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIn
         # Experimenting with looking at short sequences
         # seqs = seqLenFilter(seqs, u_cutoff=70, l_cutoff=20, l_barcode=len(bcs[expt]))
         
-        seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+        # seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
         
         # short seqs again
         # seqs = alignfilter.alignmentFilter(
