@@ -103,7 +103,9 @@ def getPosStats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     
 def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
     csv_fnames = getAllCsvFileNames(directory=directory)
-    expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
+    # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
+    
+    f_ids = ['.'.join([str(x) for x in getExpRunData(fname)]) for fname in csv_fnames]
     
     # eeek this is a hack... wish there were a way to append using the correct columns
     # rather than just use .values and assume the columns are in the same order.
@@ -111,38 +113,14 @@ def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
     outsCols = ['ct', '%', '%lb', '%ub']
     cols = [x+'_'+out for x in ntCols for out in outsCols] + ['total_n', 'sequence']
     
-    out_df = pd.DataFrame(index=sorted(expts), columns=cols)
+    out_df = pd.DataFrame(index=sorted(f_ids), columns=cols)
     
-    for fname, expt in zip(csv_fnames, expts):
-        row = getPosStats(pd.read_csv(fname), nIdx, expt=expt, letterorder=letterorder)
-        out_df.ix[expt] = row.values
+    for fname, f_id in zip(csv_fnames, f_ids):
+        row = getPosStats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
+        out_df.ix[f_id] = row.values
     
-    out_df.to_csv('summary_all.csv')    
+    out_df.to_csv('summary_all.csv')
 
-##############
-# Adding Templates to CSVs posthoc (not really necessary anymore)
-# Proposed delete: 12/1/15
-##############
-
-def addTemplate(df, template):
-    tS = pd.Series(data=list(template), name='sequence', index=df.index)
-    df['sequence'] = tS
-    return df
-
-def addTemplateToAllCSVs(yf='samples_all.yaml', directory='.'):
-    # Find misincorporation files from nextgen_main.py
-    csv_files = getAllCsvFiles(directory=directory)
-    
-    # Load yaml files
-    with open(yf) as infile:
-        expData = yaml.load(infile)
-    
-    for f in csv_files:
-        exp, run = getExpRunData(f)
-        template = expData['experiments'][exp]['template_seq']
-        df = addTemplate(pd.read_csv(f, index_col=0), template)
-        df.to_csv(f)
-        
 #####################
 # Main Routine
 #####################
