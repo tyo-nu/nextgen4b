@@ -4,7 +4,8 @@ import nextgenfilter as ngf
 
 import logging, time
 
-print "hello world"
+print "hello world again"
+
 
 # Initialize logging
 timestr = time.strftime("%Y%m%d-%H%M%S")
