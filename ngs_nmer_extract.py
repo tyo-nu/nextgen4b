@@ -12,6 +12,7 @@ from Bio import SeqIO
 import pandas as pd
 
 import sys, os, argparse
+import progressbar
     
 def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
                          bad_chars=['A','-'], letter_order=['C','G','T','A']):
@@ -77,15 +78,17 @@ if __name__ == '__main__':
     # Parse stuff
     parser = argparse.ArgumentParser(
         description='Get motifs and errors from all .fa files in directory.')
-    parser.add_argument('-M', '--motifsites', nargs='+', metavar='M',
+    parser.add_argument('-M', '--motifsites', nargs='+', type=int, metavar='M',
                         help='Sites to look for motif bases', required=True)
-    parser.add_argument('-C', '--countsites', nargs='+', metavar='C',
+    parser.add_argument('-C', '--countsites', nargs='+', type=int, metavar='C',
                         help='Sites to count bases at', required=True)       
     args = parser.parse_args(sys.argv[1:])
+    
+    pb = progressbar.ProgressBar()
     
     # Do work
     found_files = get_all_fnames(suffix='.fa')
     
-    for f in found_files:
+    for f in pb(found_files):
         df = nmer_extract_from_fa(f, args.motifsites, args.countsites)
         df.to_csv(''.join(f.split('.')[:-1])+'_motifs.csv')
