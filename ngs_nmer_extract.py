@@ -15,16 +15,29 @@ import sys
 def define_words(alphabet, n):
     return [''.join(x) for x in itertools.product(alphabet, repeat=n)]
     
-def process_fa(f_name, mot_idxs, ct_idxs):
-     seqs = SeqIO.parse(f_name)
-     mot = []
+def process_fa(f_name, mot_idxs, ct_idxs, rare_base='A', letter_order=['C','G','T','A']):
+    seqs = SeqIO.parse(f_name, 'fasta')
+    mot = []
+    ct_nts = []
      
-     for s in seqs:
-        mot.append(''.join([s[idx] for idx in mot_idxs]))
-        ct_nts = [s[idx] for idx in ct_idxs]
-        
-        
-    return 
+    for s in seqs:
+        m = ''.join([s[idx] for idx in mot_idxs])
+        if '-' not in m and rare_base not in m:
+            mot.append(m)
+            ct_nts.append([s[idx] for idx in ct_idxs])
+    
+    unique_mots = list(set(mot))
+    mot_cts = [mot.count(m) for m in unique_mots]
+    
+    # Build df
+    df = pd.DataFrame({'motif': unique_mots, 'total': mot_cts})
+    for c_idx, i in zip(ct_idxs, range(len(ct_idxs))):
+        site_letters = [l[i] for l in ct_nts]
+        for letter in letter_order:
+            site_mot_ct = [[site_letters[i] for i in range(len(mot)) if mot[i] == m].count(letter) for m in unique_mots]
+            df['%s_%i_counts' % (letter, c_idx)] = site_mot_ct
+    
+    return df
 
 
 
