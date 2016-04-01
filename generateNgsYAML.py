@@ -71,8 +71,13 @@ def generateYAMLDict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, oneT
     
     
 if __name__ == '__main__':
+    # Haha... we should have documented this when we wrote it...
+    # input 1 is the output filename, input 2 is a fasta file with your template sequence
+    
+
     # Hardcoded for Alex's 4-base stuff. Should probably change this.
-    fSeqs = ['GGGCTAGTCGTCTGTATAGG','AGACCAAGTC']
+    # Now its my Golay barcode. Change it back for Alex...
+    fSeqs = ['CATTGTCCCTAT','AGACCAAGTC']
     peSeqs = [''] # why?
     
     yDict = generateYAMLDict(fSeqs, sys.argv[2], peSeqs=peSeqs)

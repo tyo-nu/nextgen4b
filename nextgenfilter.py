@@ -88,26 +88,36 @@ def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIn
         # copiedFuncGenerator's output should return all sequence before the adapter
         seqs = filterPEMismatches(bcSeqs[expt], peSeqs, copiedFunctionGenerator(fREs))
         
-        # Experimenting with looking at short sequences
-        # seqs = seqLenFilter(seqs, u_cutoff=70, l_cutoff=20, l_barcode=len(bcs[expt]))
+        # Quality filter
+        if len(seqs) > 0:
+            seqs = qualityFilter(seqs) # Quality Filtering (needs to only have copied sequence)
+        else:
+            logging.info('No sequences left, skipped quality score filtering.\n*** Skipping remaining filtering for expt ID %s***' % expt)
+            bcSeqs[expt] = seqs
+            continue
         
-        seqs = qualityFilter(seqs) # Quality Filtering (needs to only have copied sequence)
         seqs = stripForwardBarcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
-        seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
-        seqs = seqLenFilter(seqs, l_barcode=len(bcs[expt])) # Length Filtering
         
-        # Experimenting with looking at short sequences
-        # seqs = seqLenFilter(seqs, u_cutoff=70, l_cutoff=20, l_barcode=len(bcs[expt]))
+        # Align filter
+        if len(seqs) > 0:
+            seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+        else:
+            logging.info('No sequences left, skipped align filtering.\n*** Skipping remaining filtering for expt ID %s***' % expt)
+            bcSeqs[expt] = seqs
+            continue
         
-        # seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+        # Length filtering
+        if len(seqs) > 0:
+            seqs = seqLenFilter(seqs, l_barcode=len(bcs[expt])) # Length Filtering
+        else:
+            logging.info('No sequences left, skipped length filtering.\n*** Skipping remaining filtering for expt ID %s***' % expt)
+            bcSeqs[expt] = seqs
+            continue
         
-        # short seqs again
-        # seqs = alignfilter.alignmentFilter(
-        #     seqs, templates[expt], lo_cutoff=100, hi_cutoff=500, cleanup=False)
         bcSeqs[expt] = seqs
         
     return bcSeqs
-    
+
 #####################
 # F/R Regex Filtering
 #####################
@@ -167,7 +177,7 @@ def getSeqSense(s):
 	return s.description.split(' ')[1].split(':')[0]
     
 def getCopiedSequence(s, fREs):
-    return s[fREs[0].search(str(s.seq)).end():fREs[1].search(str(s.seq)).start()+1]
+    return s[fREs[0].search(str(s.seq)).end():list(fREs[1].finditer(str(s.seq)))[-1].start()]
     
 def copiedFunctionGenerator(fREs):
     return lambda s: getCopiedSequence(s, fREs)

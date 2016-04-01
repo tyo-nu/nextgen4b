@@ -2,6 +2,8 @@ import nextgenfilter as ngf
 import nextgenanalyze as nga
 import ngsCSVAnalyze as csva
 
+from Bio import SeqIO
+
 import yaml
 import cPickle as pickle
 import sys, os
@@ -41,22 +43,17 @@ def runAllExperiments(yfname, save_intermediates=True):
             templates[expt] = expt_yaml['experiments'][expt]['template_seq']
         
         # Do filtering
-        if not os.path.isfile('aln_seqs_'+run+'.pkl'):
-            logging.info('Did not find existing seq pickle file.')
-            aln_seqs = ngf.filterSample(runs[run]['f_read_name'], runs[run]['pe_read_name'],
-                                        bcs, templates, 
-                                        runs[run]['filter_seqs']['forward'],
-                                        runs[run]['filter_seqs']['reverse'])
-            if save_intermediates:
-                pickle.dump(aln_seqs, open('aln_seqs_'+run+'.pkl', 'w')) # Save aln_seqs
-            logging.info('Finished filtering for run '+run)
-        else:
-            # If we've already done it and haven't deleted it.
-            pck_name = 'aln_seqs_'+run+'.pkl'
-            pk_file = open(pck_name)
-            aln_seqs = pickle.load(pk_file)
-            pk_file.close()
-            logging.info('Found, loaded, pre-existing pickle file: ' + pck_name)
+        logging.info('Starting filtering for run %s' % run)
+        aln_seqs = ngf.filterSample(runs[run]['f_read_name'], runs[run]['pe_read_name'],
+                                    bcs, templates, 
+                                    runs[run]['filter_seqs']['forward'],
+                                    runs[run]['filter_seqs']['reverse'])
+        if save_intermediates:
+            for expt in aln_seqs.keys():
+                with open('aln_seqs_%s_%s.fa' % (run, expt), 'w') as f:
+                    SeqIO.write(aln_seqs[expt], f, 'fasta')
+            # pickle.dump(aln_seqs, open('aln_seqs_'+run+'.pkl', 'w')) # Save aln_seqs
+        logging.info('Finished filtering for run '+run)
         
         # For each experiment in each run, do analysis
         analyzed_data = {}
@@ -88,4 +85,4 @@ if __name__ == '__main__':
     else:
         yaml_name = 'samples.yaml'
     
-    runAllExperiments(yaml_name, save_intermediates=False)
+    runAllExperiments(yaml_name, save_intermediates=True)
