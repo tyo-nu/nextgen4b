@@ -127,5 +127,4 @@ def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
 #####################
 
 if __name__ == '__main__':
-    # writeAllSimpleMisinc()
     writeAllPosStats(int(sys.argv[1]))

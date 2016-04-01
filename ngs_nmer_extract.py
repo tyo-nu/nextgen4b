@@ -9,10 +9,9 @@ incidence of nucleotides at each of the count sites.
 """
 
 from Bio import SeqIO
-
 import pandas as pd
-import sys
-import os
+
+import sys, os, argparse
     
 def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
                          bad_chars=['A','-'], letter_order=['C','G','T','A']):
@@ -63,9 +62,29 @@ def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
     return df
 
 
+def get_all_fnames(directory='.', suffix='.fa'):
+    """
+    Find all files in the given directory with a given suffix.
+    """
+    fnames = [f for f in os.listdir(directory)
+                if os.path.isfile(f) and f.endswith(suffix)]
+    return fnames
+
 
 if __name__ == '__main__':
+    # Parse stuff
+    parser = argparse.ArgumentParser(
+        description='Get motifs and errors from all .fa files in directory.')
+    parser.add_argument(['-M', '--motifsites'], nargs='+', metavar='M',
+                        help='Sites to look for motif bases')
+    parser.add_argument(['-C','--countsites'], nargs='+', metavar='C',
+                        help='Sites to count bases at')
+                        
+    parser.parse_args(sys.argv[1:])
     
+    # Do work
+    found_files = get_all_fnames(suffix='.fa')
     
     for f in found_files:
-        df = nmer_extract_from_fa(curr_path+f)
+        df = nmer_extract_from_fa(curr_path+f, motifsites, countsites)
+        df.to_csv(''.join(f.split('.')[:-1])+'_motifs.csv')

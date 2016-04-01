@@ -23,9 +23,3 @@ if __name__ == '__main__':
     with open(out_name, 'w') as of:
         for word in words:
             of.write('%s\n' % word)
-    
-    
-    
-    
-    
-    
