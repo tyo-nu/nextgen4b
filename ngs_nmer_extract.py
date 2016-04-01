@@ -75,9 +75,9 @@ if __name__ == '__main__':
     # Parse stuff
     parser = argparse.ArgumentParser(
         description='Get motifs and errors from all .fa files in directory.')
-    parser.add_argument(['-M', '--motifsites'], nargs='+', metavar='M',
+    parser.add_argument('-M', '--motifsites', nargs='+', metavar='M',
                         help='Sites to look for motif bases')
-    parser.add_argument(['-C','--countsites'], nargs='+', metavar='C',
+    parser.add_argument('-C', '--countsites', nargs='+', metavar='C',
                         help='Sites to count bases at')
                         
     parser.parse_args(sys.argv[1:])
