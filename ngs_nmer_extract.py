@@ -34,15 +34,17 @@ def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
     seqs = SeqIO.parse(f_name, 'fasta')
     mot = []
     ct_nts = []
+    max_idx = max(max(mot_idxs), max(ct_idxs))
      
     for s in seqs:
         # construct motif for each sequence
-        m = ''.join([s[idx] for idx in mot_idxs])
-        
-        # if it's acceptable, record the motif and count sites
-        if all([c not in m for c in bad_chars]):
-            mot.append(m)
-            ct_nts.append([s[idx] for idx in ct_idxs])
+        if len(s) > max_idx:
+            m = ''.join([s[idx] for idx in mot_idxs])
+            
+            # if it's acceptable, record the motif and count sites
+            if all([c not in m for c in bad_chars]):
+                mot.append(m)
+                ct_nts.append([s[idx] for idx in ct_idxs])
     
     unique_mots = list(set(mot))
     
@@ -78,13 +80,12 @@ if __name__ == '__main__':
     parser.add_argument('-M', '--motifsites', nargs='+', metavar='M',
                         help='Sites to look for motif bases', required=True)
     parser.add_argument('-C', '--countsites', nargs='+', metavar='C',
-                        help='Sites to count bases at', required=True)
-                        
-    parser.parse_args(sys.argv[1:])
+                        help='Sites to count bases at', required=True)       
+    args = parser.parse_args(sys.argv[1:])
     
     # Do work
     found_files = get_all_fnames(suffix='.fa')
     
     for f in found_files:
-        df = nmer_extract_from_fa(curr_path+f, motifsites, countsites)
+        df = nmer_extract_from_fa(f, args.motifsites, args.countsites)
         df.to_csv(''.join(f.split('.')[:-1])+'_motifs.csv')
