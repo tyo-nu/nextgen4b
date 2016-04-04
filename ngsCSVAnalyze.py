@@ -101,7 +101,8 @@ def getPosStats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     
     return out_df
     
-def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
+def writeAllPosStats(nIdx, directory='.', outfile='summary_all.csv',
+                     letterorder=['C', 'A', 'T', 'G']):
     csv_fnames = getAllCsvFileNames(directory=directory)
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
     
@@ -120,11 +121,20 @@ def writeAllPosStats(nIdx, directory='.', letterorder=['C', 'A', 'T', 'G']):
         row = getPosStats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
         out_df.ix[f_id] = row.values
     
-    out_df.to_csv('summary_all.csv')
+    out_df.to_csv(outfile)
 
 #####################
 # Main Routine
 #####################
 
 if __name__ == '__main__':
-    writeAllPosStats(int(sys.argv[1]))
+    parser = argparse.ArgumentParser(
+        description='Gets error breakdown for all conditions at a given site.')
+    parser.add_argument('idx', nargs=1, type=int, metavar='I',
+                        help='Site to examine for misincorporations')
+    parser.add_argument('-o', '--outfile', type=str, metavar='O',
+                        help='Where to output the data',
+                        default='summary_all.csv')   
+    args = parser.parse_args()
+    
+    writeAllPosStats(args.idx, outfile=args.outfile)
