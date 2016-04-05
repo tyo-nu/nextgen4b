@@ -48,7 +48,7 @@ def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi
         logging.info('Cleaning up temp files')
         os.remove(template_fname)
         os.remove(seqs_fname)
-        # os.remove(ofilen)
+        os.remove(ofilen)
     
     # Return
     logging.info('Finished alignment-based filtering. Kept %i of %i sequences.' % (len(newSeqs), start_nSeqs))
