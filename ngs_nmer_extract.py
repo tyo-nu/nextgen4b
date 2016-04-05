@@ -81,7 +81,10 @@ if __name__ == '__main__':
     parser.add_argument('-M', '--motifsites', nargs='+', type=int, metavar='M',
                         help='Sites to look for motif bases', required=True)
     parser.add_argument('-C', '--countsites', nargs='+', type=int, metavar='C',
-                        help='Sites to count bases at', required=True)       
+                        help='Sites to count bases at', required=True)
+    parser.add_argument('-B', '--badchars', nargs='*', type=str, metavar='B',
+                        default=['A', '-'],
+                        help='Remove motifs with these characters')
     args = parser.parse_args(sys.argv[1:])
     
     pb = progressbar.ProgressBar()
@@ -90,5 +93,6 @@ if __name__ == '__main__':
     found_files = get_all_fnames(suffix='.fa')
     
     for f in pb(found_files):
-        df = nmer_extract_from_fa(f, args.motifsites, args.countsites)
+        df = nmer_extract_from_fa(f, args.motifsites, args.countsites,
+                                  bad_chars=args.badchars)
         df.to_csv(''.join(f.split('.')[:-1])+'_motifs.csv')
