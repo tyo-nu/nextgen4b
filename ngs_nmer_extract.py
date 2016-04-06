@@ -14,8 +14,7 @@ import pandas as pd
 import sys, os, argparse
 import progressbar
     
-def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
-                         bad_chars=['A','-'], letter_order=['C','G','T','A']):
+def extract_motifs_and_bases(f_name, mot_idxs, ct_idxs, bad_chars=['A','-']):
     """
     Open a .fasta file, extract a given set of bases as a motif 
     and a given set of bases as counted nts.
@@ -29,12 +28,11 @@ def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
     
     Keywords:
     bad_chars       -- Discard motifs that include these characters
-    letter_order    -- The letters we're looking for (in order)
     """
     
     seqs = SeqIO.parse(f_name, 'fasta')
     mot = []
-    ct_nts = []
+    nts = []
     max_idx = max(max(mot_idxs), max(ct_idxs))
      
     for s in seqs:
@@ -45,11 +43,16 @@ def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
             # if it's acceptable, record the motif and count sites
             if all([c not in m for c in bad_chars]):
                 mot.append(m)
-                ct_nts.append([s[idx] for idx in ct_idxs])
-    
+                nts.append([s[idx] for idx in ct_idxs])
+                
+    return mot, nts
+
+############
+# Output Generators
+############
+
+def gen_mot_counts_df(mot, nts, ct_idxs, letter_order=['C','G','T','A']):
     unique_mots = list(set(mot))
-    
-    # Get totals for each of the motifs
     mot_cts = [mot.count(m) for m in unique_mots]
     
     # Build df
@@ -63,7 +66,43 @@ def nmer_extract_from_fa(f_name, mot_idxs, ct_idxs,
             df['%s_%i_counts' % (letter, c_idx)] = site_mot_ct
     
     return df
+    
+def gen_mot_lists(mot, nts, site_idx=0,
+                  set1=['C', 'G', 'T'], set2=['A']):
+    mots_set1 = []
+    mots_set2 = []
+    
+    for m, i in enumerate(mot):
+        if nts[i][site] in set1:
+            mots_set1.append(m)
+        if nts[i][site] in set2:
+            mots_set2.append(m)
+    
+    return mots_set1, mots_set2
 
+############
+# File Generators
+############
+
+def output_motif_lists(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
+    mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
+                                        bad_chars=bad_chars)
+    l1, l2 = gen_mot_lists(mot, nts, site_idx=0)
+    n1, n2 = [''.join(f.split('.')[:-1]) + s for s in ['_set1.fa', '_set2.fa']]
+    
+    SeqIO.write(l1, n1, 'fasta')
+    SeqIO.write(l2, n2, 'fasta')
+    
+def output_motif_counts(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
+    mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
+                                        bad_chars=bad_chars)
+    df = gen_mot_counts_df(mot, nts, ct_idxs)
+    df.to_csv(''.join(fname.split('.')[:-1])+'_motifs.csv')
+    
+    
+############
+# Do it.
+############
 
 def get_all_fnames(directory='.', suffix='.fa'):
     """
@@ -85,6 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('-B', '--badchars', nargs='*', type=str, metavar='B',
                         default=['A', '-'],
                         help='Remove motifs with these characters')
+    parser.add_argument('O', '--outmode', choices=['meme', 'counts'],
+                        default='counts')
     args = parser.parse_args(sys.argv[1:])
     
     pb = progressbar.ProgressBar()
@@ -93,6 +134,9 @@ if __name__ == '__main__':
     found_files = get_all_fnames(suffix='.fa')
     
     for f in pb(found_files):
-        df = nmer_extract_from_fa(f, args.motifsites, args.countsites,
-                                  bad_chars=args.badchars)
-        df.to_csv(''.join(f.split('.')[:-1])+'_motifs.csv')
+        if args.outmode == 'meme':
+            output_motif_lists(f, args.motifsites, args.countsites,
+                               bad_chars=args.badchars)
+        if args.outmode == 'counts':
+            output_motif_counts(f, args.motifsites, args.countsites,
+                               bad_chars=args.badchars)
