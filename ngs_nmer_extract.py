@@ -139,7 +139,7 @@ if __name__ == '__main__':
     for f in pb(found_files):
         if args.outmode == 'meme':
             output_motif_lists(f, args.motifsites, args.countsites,
-                               bad_chars=args.badchars)
+                               bad_chars=args.badchars, pad='AA')
         if args.outmode == 'counts':
             output_motif_counts(f, args.motifsites, args.countsites,
                                bad_chars=args.badchars)
