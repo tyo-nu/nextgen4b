@@ -8,7 +8,7 @@ define the sites we want to count at. Finds unique motifs, then counts the
 incidence of nucleotides at each of the count sites.
 """
 
-from Bio import SeqIO
+from Bio import SeqIO, Seq, SeqRecord
 import pandas as pd
 
 import sys, os, argparse
@@ -72,10 +72,10 @@ def gen_mot_lists(mot, nts, site_idx=0,
     mots_set1 = []
     mots_set2 = []
     
-    for m, i in enumerate(mot):
-        if nts[i][site] in set1:
+    for i, m in enumerate(mot):
+        if nts[i][site_idx] in set1:
             mots_set1.append(m)
-        if nts[i][site] in set2:
+        if nts[i][site_idx] in set2:
             mots_set2.append(m)
     
     return mots_set1, mots_set2
@@ -84,14 +84,17 @@ def gen_mot_lists(mot, nts, site_idx=0,
 # File Generators
 ############
 
-def output_motif_lists(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
+def output_motif_lists(fname, mot_idxs, ct_idxs, bad_chars=['A','-'],
+                       reverse_comp_motifs=False, pad='AA'):
     mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
                                         bad_chars=bad_chars)
     l1, l2 = gen_mot_lists(mot, nts, site_idx=0)
-    n1, n2 = [''.join(f.split('.')[:-1]) + s for s in ['_set1.fa', '_set2.fa']]
+    n1, n2 = [''.join(f.split('.')[:-1]) + s for s in ['_set1.fasta', '_set2.fasta']]
     
-    SeqIO.write(l1, n1, 'fasta')
-    SeqIO.write(l2, n2, 'fasta')
+    SeqIO.write([SeqRecord.SeqRecord(Seq.Seq(pad + s), id=str(i),
+                 description='') for i, s in  enumerate(l1)], n1, 'fasta')
+    SeqIO.write([SeqRecord.SeqRecord(Seq.Seq(pad + s), id=str(i),
+                 description='') for i, s in  enumerate(l2)], n2, 'fasta')
     
 def output_motif_counts(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
     mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
@@ -124,7 +127,7 @@ if __name__ == '__main__':
     parser.add_argument('-B', '--badchars', nargs='*', type=str, metavar='B',
                         default=['A', '-'],
                         help='Remove motifs with these characters')
-    parser.add_argument('O', '--outmode', choices=['meme', 'counts'],
+    parser.add_argument('-O', '--outmode', choices=['meme', 'counts'],
                         default='counts')
     args = parser.parse_args(sys.argv[1:])
     
