@@ -102,6 +102,16 @@ def output_motif_counts(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
     df = gen_mot_counts_df(mot, nts, ct_idxs)
     df.to_csv(''.join(fname.split('.')[:-1])+'_motifs.csv')
     
+def output_motif_csv(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
+    mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
+                                        bad_chars=bad_chars)
+    with open(''.join(fname.split('.')[:-1])+'_mot.csv', 'w') as o_f:
+        o_f.write(', '.join('motif'+['site_'+ct for ct in ct_idxs]) + '\n')
+        for m, n in zip(mot, nts):
+            o_f.write('%s' % m)
+            for base in n:
+                o_f.write(', %s' % base)
+            o_f.write('\n')
     
 ############
 # Do it.
@@ -127,7 +137,7 @@ if __name__ == '__main__':
     parser.add_argument('-B', '--badchars', nargs='*', type=str, metavar='B',
                         default=['A', '-'],
                         help='Remove motifs with these characters')
-    parser.add_argument('-O', '--outmode', choices=['meme', 'counts'],
+    parser.add_argument('-O', '--outmode', choices=['meme', 'counts', 'csv'],
                         default='counts')
     args = parser.parse_args(sys.argv[1:])
     
@@ -143,3 +153,6 @@ if __name__ == '__main__':
         if args.outmode == 'counts':
             output_motif_counts(f, args.motifsites, args.countsites,
                                bad_chars=args.badchars)
+        if args.outmode == 'csv':
+            output_motif_csv(f, args.motifsites, args.countsites,
+                             bad_chars=args.badchars)
