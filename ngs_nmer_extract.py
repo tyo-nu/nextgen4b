@@ -106,12 +106,12 @@ def output_motif_csv(fname, mot_idxs, ct_idxs, bad_chars=['A','-']):
     mot, nts = extract_motifs_and_bases(fname, mot_idxs, ct_idxs,
                                         bad_chars=bad_chars)
     with open(''.join(fname.split('.')[:-1])+'_mot.csv', 'w') as o_f:
-        o_f.write(', '.join(['motif']+['site_'+str(ct)
+        o_f.write(','.join(['motif']+['site_'+str(ct)
                                      for ct in ct_idxs]) + '\n')
         for m, n in zip(mot, nts):
             o_f.write('%s' % m)
             for base in n:
-                o_f.write(', %s' % base)
+                o_f.write(',%s' % base)
             o_f.write('\n')
     
 ############
