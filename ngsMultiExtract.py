@@ -10,22 +10,23 @@ def replace_deletions(word, seq, idxs, del_letter='d'):
 
 
     """
-    new_word = word.copy()
+    new_word = [c for c in word]
 
     for i, letter in enumerate(word):
         # assume we're not looking at the start or end of sequence
-        assert i > 0 and i < len(seq)
+        idx = idxs[i]
+        assert idx > 0 and idx < len(seq)
 
         if letter == '-':
-            if s[idxs[i-1]] != '-' and s[idxs[i+1]] != '-':
+            if seq[idx-1] != '-' and seq[idx+1] != '-':
                 new_word[i] = del_letter
 
-    return new_word
+    return ''.join(new_word)
 
 def get_positions(f_name, sites, keep_dashes=True, mark_deletions=True):
     """
     Reads in a fasta file of sequences (usually produced by nextgen_main.py)
-    at location f_name, and pulls out the bases at the (0-start) indices in 
+    at location f_name, and pulls out the bases at the (0-start) indices in
     sites.
 
     Input:
