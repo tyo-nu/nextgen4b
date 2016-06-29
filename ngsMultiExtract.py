@@ -23,7 +23,7 @@ def replace_deletions(word, seq, idxs, del_letter='d'):
 
     return ''.join(new_word)
 
-def get_positions(f_name, sites, keep_dashes=True, mark_deletions=True):
+def get_positions(f_name, sites, keep_dashes=True, mark_deletions=False):
     """
     Reads in a fasta file of sequences (usually produced by nextgen_main.py)
     at location f_name, and pulls out the bases at the (0-start) indices in
