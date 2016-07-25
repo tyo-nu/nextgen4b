@@ -112,3 +112,5 @@ $RECYCLE.BIN/
 *.lnk
 *.iml
 *.png
+*.svg
+*.ipynb
