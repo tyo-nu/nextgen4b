@@ -7,14 +7,36 @@ import tqdm
 # from scipy.misc import logsumexp
 
 #########################
+# Bootstrap and Pseudo-R2 Code
+#########################
+
+def load_words_to_array(fname, rare_base='A', discard_base='-'):
+    """
+    Return a KxM {0,1} array representing the M-length words contained in
+    one of the word.txt files you've been using
+    """
+    with open(fname) as i_f:
+        txt_data = [line.strip() for line in i_f.readlines()
+                    if discard_base not in line]
+
+    return np.array([np.where([c is rare_base for c in s], 0, 1)
+                     for s in txt_data])
+
+def load_controls_to_P(A_D_0, A_D_1):
+    p1 = np.sum(A_D_0, axis=0) / A_D_0.shape[0]
+    p2 = np.sum(A_D_1, axis=0) / A_D_1.shape[0]
+
+    return np.array([p1, p2])
+
+#########################
 # Signal Allocation Code
 #########################
 
-def is_monotonic_list(L):
+def is_monotonic(vec):
     """
     Return True if items in list do not decrease, otherwise return False
     """
-    return all([(L[m+1] - L[m]) >= 0 for m in range(len(L) - 1)])
+    return all([(vec[m+1] - vec[m]) >= 0 for m in range(len(vec) - 1)])
 
 def get_monotonic_allocations(length_d, length_s):
     """
@@ -30,7 +52,7 @@ def get_monotonic_allocations(length_d, length_s):
     """
 
     return [list(I) for I in itertools.product(range(length_s), repeat=length_d)
-            if is_monotonic_list(I)]
+            if is_monotonic(I)]
 
 #########################
 # Single-Sequence Likelihood Code
