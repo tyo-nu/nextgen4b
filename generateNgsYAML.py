@@ -74,9 +74,7 @@ if __name__ == '__main__':
     # Haha... we should have documented this when we wrote it...
     # input 1 is the output filename, input 2 is a fasta file with your template sequence
 
-    # Hardcoded for Alex's 4-base stuff. Should probably change this.
-    # Now its the common sequences... should work for both of us?
-    fSeqs = ['GGGCTAGTCGTCTGTATAGG','AGACCAAGTCTCTGCTACCGTA']
+    fSeqs = ['CATTGTCCCTAT','AGACCAAGTCTCTGCTACCGTA']
     peSeqs = [''] # why?
 
     yDict = generateYAMLDict(fSeqs, sys.argv[2], peSeqs=peSeqs)

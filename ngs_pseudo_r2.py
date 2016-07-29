@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import random
 import tqdm
-# from scipy.misc import logsumexp
+from scipy.misc import logsumexp
 
 #########################
 # Bootstrap and Pseudo-R2 Code
@@ -23,10 +23,10 @@ def load_words_to_array(fname, rare_base='A', discard_base='-'):
                      for s in txt_data])
 
 def load_controls_to_P(A_D_0, A_D_1):
-    p1 = np.sum(A_D_0, axis=0) / A_D_0.shape[0]
-    p2 = np.sum(A_D_1, axis=0) / A_D_1.shape[0]
+    p1 = np.sum(A_D_0, axis=0) / float(A_D_0.shape[0])
+    p2 = np.sum(A_D_1, axis=0) / float(A_D_1.shape[0])
 
-    return np.array([p1, p2])
+    return np.array([p1, p2]).T
 
 #########################
 # Signal Allocation Code
@@ -91,16 +91,16 @@ def seq_log_lhood(D, S, L_I, P, prior=None):
         L_I - A list of M-length lists, providing indexing of each element of D to an element of S
         P - A numpy Nx2 array, each row composed of error rates [p_{m,0}, p_{m,1}]
         prior - A numpy array the length of L_I. The likelihood of each allocation, defaults to a uniform prior
-        
+
     Output:
         ll - The maximum log-likelihood of the strand given S, I, and P
     """
 
     if not prior: # i.e. it's uniform
-        prior = np.ones((len(L_I),1), dtype=float) / len(L_I)
+        prior = np.ones(len(L_I), dtype=float) / len(L_I)
     
-    # out = logsumexp([seq_alloc_log_lhood(D,S,I,P) for I in L_I], b=prior)
-    out = np.max([seq_alloc_log_lhood(D,S,I,P) + np.log(p) for I, p in zip(L_I, prior)])
+    out = logsumexp([seq_alloc_log_lhood(D,S,I,P) for I in L_I], b=prior)
+    # out = np.max([seq_alloc_log_lhood(D,S,I,P) + np.log(p) for I, p in zip(L_I, prior)])
 
     return out
 
@@ -142,7 +142,7 @@ def all_log_lhood_fast(A_D, S, P):
     L_I = get_monotonic_allocations(A_D.shape[1], len(S))
     
     # Get all possible D's
-    possible_Ds = list(itertools.product([0,1], repeat=len(L_D[0])))
+    possible_Ds = list(itertools.product([0,1], repeat=len(A_D[0])))
     
     prob_Ds = {D: seq_log_lhood(np.array(D),S,L_I,P) for D in possible_Ds}
     
@@ -175,12 +175,13 @@ def rel_pseudo_r2_pop(L_D, S1, S2, P1, P2=None):
     
     return 1 - (logL_1/logL_2)
 
-def bootstr_ci(func, X, alpha=0.05, args=None, n_iter=1000, samp_size=None):
+def bootstr_ci(func, X, alpha=0.05, args=None, n_iter=1000, samp_size=None,
+               verbose=False):
     if args:
         f = lambda data: func(data, *args)
     else:
         f = func
-        
+
     if not samp_size:
         samp_size = len(X)
     
@@ -188,42 +189,54 @@ def bootstr_ci(func, X, alpha=0.05, args=None, n_iter=1000, samp_size=None):
     
     bootstrap_stats = np.zeros((n_iter,1))
     
-    for i in tqdm.tqdm(range(n_iter)):
-        resampled_idx = np.random.randint(X.shape[0], size=(samp_size,1))
-        resampled_X = X[resampled_idx,:].squeeze()
-        bootstrap_stats[i] = f(resampled_X)
-    
+    if verbose:
+        for i in tqdm.tqdm(range(n_iter)):
+            resampled_idx = np.random.randint(X.shape[0], size=(samp_size,1))
+            resampled_X = X[resampled_idx,:].squeeze()
+            bootstrap_stats[i] = f(resampled_X)
+    else:
+        for i in range(n_iter):
+            resampled_idx = np.random.randint(X.shape[0], size=(samp_size,1))
+            resampled_X = X[resampled_idx,:].squeeze()
+            bootstrap_stats[i] = f(resampled_X)
+
     srt_bootstrap_stats = np.sort(bootstrap_stats.squeeze())
     
     ci = (srt_bootstrap_stats[Fstar_lo], srt_bootstrap_stats[Fstar_hi])
     
     return ci
 
-def bootstr_ci_pseudo_r2(L_D, S1, S2, P1, P2=None, alpha=0.05, n_iter=1000, samp_size=None):
+def bootstr_ci_pseudo_r2(L_D, S1, S2, P1, P2=np.array([]),
+                         alpha=0.05, n_iter=1000, samp_size=None, verbose=False):
     """
     Does bootstrap for pseudo-r2. Gets significant speedups as we can precompute the 
     log-likelihood of all the sequences first, then just bootstrap over the sum.
     """
-    if not P2: # This might be better handled by *args...
+    if not P2.shape: # This might be better handled by *args...
         P2 = P1
-        
+
     if not samp_size:
         samp_size = L_D.shape[0]
-        
+
+    if verbose:
+        iterator = tqdm.tqdm(range(n_iter))
+    else:
+        iterator = range(n_iter)
+
     Fstar_lo, Fstar_hi = np.floor(n_iter * np.array([alpha/2., 1-alpha/2.])).astype(int)
-    
+
     # Pre-calculate log-likelihoods
     logLs_1 = all_log_lhood_fast(L_D, S1, P1)
     logLs_2 = all_log_lhood_fast(L_D, S2, P2)
-    
+
     bootstrap_stats = np.zeros((n_iter,1))
-    
-    for i in tqdm.tqdm(range(n_iter)):
+
+    for i in iterator:
         resampled_idx = np.random.randint(L_D.shape[0], size=(samp_size,1))
         bootstrap_stats[i] = 1 - (np.sum(logLs_1[resampled_idx].squeeze()) /
                                   np.sum(logLs_2[resampled_idx].squeeze()))
-    
+
     srt_bootstrap_stats = np.sort(bootstrap_stats.squeeze())
-    
+
     ci = (srt_bootstrap_stats[Fstar_lo], srt_bootstrap_stats[Fstar_hi])
     return ci
