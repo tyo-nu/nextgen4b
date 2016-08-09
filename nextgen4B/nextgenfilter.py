@@ -45,11 +45,12 @@ def loadNGSFileToList(fpath, ftype='fastq'):
 # Main Filter Code
 #####################
 
-def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIntermediate=False,
-    saveEnd=False, preserveMemory=True):
-    """Outputs filtered sequences as dictionary, indexed by barcode
+def filterSample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveIntermediate=False, saveEnd=False, preserveMemory=True):
+    """
+    Outputs filtered sequences as dictionary, indexed by barcode
     Sequences will be aligned to the provided template.
-    Parts of the template not represented will be '-'""" 
+    Parts of the template not represented will be '-'
+    """ 
     
     logging.info('Started filtering routine for %s' % (fName))
     
