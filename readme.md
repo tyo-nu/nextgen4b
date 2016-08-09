@@ -1,7 +1,7 @@
 # nextgen4b
 ### A library to analyze positional error rates in nextgen sequencing data
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/tcyb/nexgen4b/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/tcyb/nexgen4b/blob/master/license.txt)
 
 A set of scripts to manipulate and process .fastq files from next-generation sequencing experiments for "rare-base" assays as conducted in the Tyo lab at Northwestern University. In general, these scripts will filter your data for bad sequences, align them to a given template, retrieve the bases at positions of interest, and analyze them in a number of ways.
 
