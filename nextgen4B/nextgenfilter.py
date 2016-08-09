@@ -1,13 +1,10 @@
 import re, os, gzip
 import logging
 import numpy as np
-import progressbar
 
 from Bio import SeqIO
 
 import alignfilter
-
-pbar = progressbar.ProgressBar()
 
 #####################
 # File Management

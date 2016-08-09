@@ -12,9 +12,7 @@ import pandas as pd
 
 import logging
 import time
-import progressbar
-
-pbar = progressbar.ProgressBar()
+from tqdm import tqdm
 
 # Setup Logging
 timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -30,7 +28,7 @@ def runAllExperiments(yfname, save_intermediates=True):
     runs = expt_yaml['ngsruns']
     logging.info('Found NGS Runs: '+', '.join(runs))
     
-    for run in pbar(runs.keys()):
+    for run in tqdm(runs.keys()):
         logging.info('Performing routine for NGS Run '+run)
         expts = runs[run]['experiments']
         logging.info('Found experiments '+', '.join(expts))
