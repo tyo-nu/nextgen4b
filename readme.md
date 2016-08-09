@@ -25,7 +25,11 @@ If you plan on modifying or contributing code, you can install in-place via syml
 
     python setup.py develop
 
-Lastly, you will need to install a modified biopython
+Lastly, you will need to install EMBOSS and a modified biopython
+
+### Installing EMBOSS
+
+This code relies on EMBOSS's optimized `needle` routine in order to perform sequence alignment. You can find instructions on installation [here](http://emboss.sourceforge.net/download/). You will need to add the EMBOSS `bin` directory to your path for Biopython to be able to access `needle`.
 
 ### Adding alignment metadata to Bio.AlignIO
 
