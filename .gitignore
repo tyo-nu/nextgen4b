@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# PyCharm?
-.idea
-
 # Distribution / packaging
 .Python
 env/
@@ -111,6 +108,10 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 *.iml
+
+# Images and Notebooks
+# There are a lot of these generated when doing this work,
+# Probably want to add the notebooks back in at some point.
 *.png
 *.svg
 *.ipynb
