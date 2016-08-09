@@ -255,3 +255,7 @@ def seqLenFilter(seqs, l_cutoff=70, u_cutoff=200, l_barcode=0):
     
     logging.info('Finished Length Filtering. Kept %i of %i sequences.' % (len(l), len(seqs)))
     return l
+
+#####################
+# Alignment Filtering
+#####################

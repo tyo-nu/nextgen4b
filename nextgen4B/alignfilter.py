@@ -40,22 +40,19 @@ def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi
     # and keep it as an annotation of the MultipleSeqAlign object
     
     alnData = AlignIO.parse(open(ofilen), "emboss")
-    
-    newSeqs = cullAlignments(alnData, lo_cutoff=lo_cutoff, hi_cutoff=hi_cutoff)
+    newSeqs = cull_alignments(alnData, lo_cutoff=lo_cutoff, hi_cutoff=hi_cutoff)
         
-    # Clean up temp files
+    # Exit routine
     if cleanup:
         logging.info('Cleaning up temp files')
         os.remove(template_fname)
         os.remove(seqs_fname)
         os.remove(ofilen)
-    
-    # Return
     logging.info('Finished alignment-based filtering. Kept %i of %i sequences.' % (len(newSeqs), start_nSeqs))
     return newSeqs
 
 
-def cullAlignments(alnData, lo_cutoff=400, hi_cutoff=650):
+def cull_alignments(alnData, lo_cutoff=400, hi_cutoff=650):
     newSeqs = []
 
     for alignment in alnData:
