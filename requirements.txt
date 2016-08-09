@@ -1,0 +1,13 @@
+##
+# Requirements
+##
+
+biopython
+tqdm
+yaml
+pandas
+numpy
+matplotlib
+scipy
+statsmodels
+seaborn
