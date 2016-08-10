@@ -110,7 +110,7 @@ $RECYCLE.BIN/
 *.iml
 
 # Visual Studio Code files
-.vcode/
+.vscode/
 
 # Images and Notebooks
 # There are a lot of these generated when doing this work,
