@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 
 import logging, sys
 
 from Bio import AlignIO
 from Bio import SeqIO
 
-import alignfilter
+from ..process.filter import cull_alignments
 
 #####################
 # Dataframe creation and manipulation
@@ -57,7 +56,7 @@ def addSequenceColumn(df, template):
     
 def processNeedle(needleObj, tempSeq):
     # filter based on alignment score.
-    seqs = alignfilter.cullAlignments(needleObj)    
+    seqs = cull_alignments(needleObj)    
     return doAnalysis(seqs, tempSeq)
     
 def doAnalysis(seqs, template):
@@ -70,6 +69,30 @@ def doAnalysis(seqs, template):
 ############
 # Main Routine
 ############
+
+def analyze_all_experiments():
+    # For each experiment in each run, do analysis
+    analyzed_data = {}
+    for expt in expts:
+        analyzed_data_fname = expt+'_'+run+'_misinc_data.csv'
+        if not os.path.isfile(analyzed_data_fname):
+            # Get positional misincorporations
+            template = templates[expt]
+            analyzed_data[expt] = nga.doAnalysis(aln_seqs[expt], template)
+            
+            # Save dataframe
+            of = open(analyzed_data_fname, 'w')
+            analyzed_data[expt].to_csv(of)
+            of.close()
+        else:
+            infile = open(analyzed_data_fname)
+            analyzed_data[expt] = pd.read_csv(infile)
+            infile.close()
+            logging.info('Found, loaded, pre-existing analysis file: '+ analyzed_data_fname)
+        
+        # Do analysis
+        # ... not yet
+        logging.info('Finished analysis for experiment '+expt)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

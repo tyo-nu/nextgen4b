@@ -33,7 +33,7 @@ def getAllCsvFileNames(directory='.', csv_suffix='misinc_data.csv'):
 # Simple Stats 
 #####################
 
-def getstats(df, cutoff=1):
+def get_stats(df, cutoff=1):
     data = df[[c for c in df.columns if not c == 'sequence']]
     total_n = data.sum(axis=1) # All non-corresponding data should be zero
     correct_n = data[[n+'->'+n for n in ['A', 'C', 'T', 'G']]] # Get the columns that correspond to correct incorporations
@@ -53,19 +53,19 @@ def getstats(df, cutoff=1):
     
     return simp_df
     
-def writeAllSimpleMisinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
+def write_all_simple_misinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
     csv_fnames = getAllCsvFileNames(directory=directory)
     
     for fname in csv_fnames:
         df = pd.read_csv(fname, index_col=0)
-        simple_df = getstats(df)
+        simple_df = get_stats(df)
         simple_df.to_csv('simple_'+fname)
         
 #####################
 # Single Position Stats
 #####################
 
-def getPosStats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
+def get_pos_stats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     # Get row of interest
     data = df[[c for c in df.columns if not c == 'sequence']].iloc[nIdx]
     nt = df['sequence'].iloc[nIdx]
@@ -101,7 +101,7 @@ def getPosStats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     
     return out_df
     
-def writeAllPosStats(nIdx, directory='.', outfile='summary_all.csv',
+def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
                      letterorder=['C', 'A', 'T', 'G']):
     csv_fnames = getAllCsvFileNames(directory=directory)
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
@@ -118,7 +118,7 @@ def writeAllPosStats(nIdx, directory='.', outfile='summary_all.csv',
     out_df = pd.DataFrame(index=sorted(f_ids), columns=cols)
     
     for fname, f_id in zip(csv_fnames, f_ids):
-        row = getPosStats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
+        row = get_pos_stats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
         out_df.ix[f_id] = row.values
     
     out_df.to_csv(outfile)
@@ -137,4 +137,4 @@ if __name__ == '__main__':
                         default='summary_all.csv')   
     args = parser.parse_args()
     
-    writeAllPosStats(args.idx, outfile=args.outfile)
+    write_all_pos_stats(args.idx, outfile=args.outfile)
