@@ -11,7 +11,7 @@ timestr = time.strftime("%Y%m%d-%H%M%S")
 logging.basicConfig(filename='bcdemux_'+timestr+'.log',
     level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-def demuxByBarcode(yfname, ffname, fsuffix='R1'):
+def demux_by_barcode(yfname, ffname, fsuffix='R1'):
     logging.info('Started forward sequence demuxing of '+ffname)
     # Load YAML
     yf = open(yfname)
@@ -40,7 +40,7 @@ def demuxByBarcode(yfname, ffname, fsuffix='R1'):
     logging.info('Finished forward-strand demuxing of '+ffname)
 
 
-def demuxPEByBarcode(yfname, pefname, fsuffix='R1', pesuffix='R2'):
+def demux_PE_by_barcode(yfname, pefname, fsuffix='R1', pesuffix='R2'):
     logging.info('Started paired-end sequence demuxing of '+pefname)
     yf = open(yfname)
     expt_yaml = yaml.load(yf)
@@ -74,8 +74,11 @@ def demuxPEByBarcode(yfname, pefname, fsuffix='R1', pesuffix='R2'):
             pass
     logging.info('Finished experiment-matching for paired-end sequences.')
     logging.info('Finished paired-end strand demuxing for '+pefname)
+
+def demux_dataset(yfname, ffname, pefname):
+    demux_by_barcode(yfname, ffname)
+    demux_PE_by_barcode(yfname, pefname)
     
 
 if __name__ == '__main__':
-    demuxByBarcode(sys.argv[1], sys.argv[2])
-    demuxPEByBarcode(sys.argv[1], sys.argv[3])
+    demux_dataset(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -10,12 +10,6 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Emboss.Applications import NeedleCommandline
 
-## Setup Logging
-# I think we can remove this since it's in the init code.' 
-# timestr = time.strftime("%Y%m%d-%H%M%S")
-# logging.basicConfig(filename='ngs_'+timestr+'.log',
-#     level=logging.DEBUG, format='%(asctime)s %(message)s')
-
 __all__ = ['filter_sample']
 
 #####################
@@ -110,7 +104,7 @@ def filter_sample(fName, peName, bcs, templates, f_filt_seqs, r_filt_seqs, saveI
         
         # Align filter
         if len(seqs) > 0:
-            seqs = alignfilter.alignmentFilter(seqs, templates[expt]) # Do alignment-based filtering
+            seqs = alignment_filter(seqs, templates[expt]) # Do alignment-based filtering
         else:
             logging.info('No sequences left, skipped align filtering.\n*** Skipping remaining filtering for expt ID %s***' % expt)
             bcSeqs[expt] = seqs
@@ -272,7 +266,7 @@ def seqLenFilter(seqs, l_cutoff=70, u_cutoff=200, l_barcode=0):
 # Alignment Filtering
 #####################
 
-def alignmentFilter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi_cutoff=1000,
+def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300, hi_cutoff=1000,
                     cleanup=True):
     logging.info('Started alignment-based filtering')
     start_nSeqs = len(seqs)
@@ -332,7 +326,12 @@ def cull_alignments(alnData, lo_cutoff=400, hi_cutoff=650):
 # Main Routines
 #####################
 
-def runAllExperiments(yfname, save_intermediates=True):
+def run_all_experiments(yfname, save_intermediates=True):
+    # Start Logging
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    logging.basicConfig(filename='ngs_'+timestr+'.log',
+        level=logging.DEBUG, format='%(asctime)s %(message)s')
+
     # Load YAML file
     with open(yfname) as expt_f:
         expt_yaml = yaml.load(expt_f) # Should probably make this a class at some point...
@@ -372,4 +371,4 @@ if __name__ == '__main__':
     else:
         yaml_name = 'samples.yaml'
     
-    runAllExperiments(yaml_name, save_intermediates=True)
+    run_all_experiments(yaml_name, save_intermediates=True)
