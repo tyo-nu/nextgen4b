@@ -109,6 +109,9 @@ $RECYCLE.BIN/
 *.lnk
 *.iml
 
+# Visual Studio Code files
+.vscode/
+
 # Images and Notebooks
 # There are a lot of these generated when doing this work,
 # Probably want to add the notebooks back in at some point.
