@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "nextgen4b",
-    version = "0.0.1.dev",
+    version = "0.0.1.dev0",
     author = "Ted Cybulski",
     author_email = "tcybulski@gmail.com",
     description = (""),
