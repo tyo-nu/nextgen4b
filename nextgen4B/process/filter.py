@@ -15,10 +15,11 @@ import nextgenanalyze as nga
 import ngsCSVAnalyze as csva
 import pandas as pd
 
-# Setup Logging
-timestr = time.strftime("%Y%m%d-%H%M%S")
-logging.basicConfig(filename='ngs_'+timestr+'.log',
-    level=logging.DEBUG, format='%(asctime)s %(message)s')
+## Setup Logging
+# I think we can remove this since it's in the init code.' 
+# timestr = time.strftime("%Y%m%d-%H%M%S")
+# logging.basicConfig(filename='ngs_'+timestr+'.log',
+#     level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 __All__ = ['filter_sample']
 
@@ -368,31 +369,7 @@ def runAllExperiments(yfname, save_intermediates=True):
                 with open('aln_seqs_%s_%s.fa' % (run, expt), 'w') as f:
                     SeqIO.write(aln_seqs[expt], f, 'fasta')
             # pickle.dump(aln_seqs, open('aln_seqs_'+run+'.pkl', 'w')) # Save aln_seqs
-        logging.info('Finished filtering for run '+run)
-        
-        # For each experiment in each run, do analysis
-        analyzed_data = {}
-        for expt in expts:
-            analyzed_data_fname = expt+'_'+run+'_misinc_data.csv'
-            if not os.path.isfile(analyzed_data_fname):
-                # Get positional misincorporations
-                template = templates[expt]
-                analyzed_data[expt] = nga.doAnalysis(aln_seqs[expt], template)
-                
-                # Save dataframe
-                of = open(analyzed_data_fname, 'w')
-                analyzed_data[expt].to_csv(of)
-                of.close()
-            else:
-                infile = open(analyzed_data_fname)
-                analyzed_data[expt] = pd.read_csv(infile)
-                infile.close()
-                logging.info('Found, loaded, pre-existing analysis file: '+ analyzed_data_fname)
-            
-            # Do analysis
-            # ... not yet
-            logging.info('Finished analysis for experiment '+expt)
-            
+        logging.info('Finished filtering for run '+run)            
     
 if __name__ == '__main__':
     if len(sys.argv) > 1:

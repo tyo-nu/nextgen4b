@@ -6,6 +6,6 @@ logging.basicConfig(filename='ngs_'+timestr+'.log',
     level=logging.DEBUG, format='%(asctime)s %(message)s')
 
 # Am I doing this right?
-import ./filter
-import ./multimer
-import ./sites
+import .filter
+import .multimer
+import .sites
