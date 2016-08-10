@@ -16,7 +16,7 @@ from Bio.Emboss.Applications import NeedleCommandline
 # logging.basicConfig(filename='ngs_'+timestr+'.log',
 #     level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-__All__ = ['filter_sample']
+__all__ = ['filter_sample']
 
 #####################
 # File Management
