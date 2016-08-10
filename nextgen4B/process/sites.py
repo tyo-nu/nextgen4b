@@ -7,8 +7,6 @@ def replace_deletions(word, seq, idxs, del_letter='d'):
     """
     Replace any '-' in word with del_letter if the nucleotides next to it in
     seq are not '-'.
-
-
     """
     new_word = [c for c in word]
 

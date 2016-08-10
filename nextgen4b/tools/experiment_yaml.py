@@ -31,7 +31,7 @@ def formatExpt(name, template, bc='', exp_dict={}):
 def loadTemplates(fname, ftype='fasta'):
     return list(SeqIO.parse(open(fname), ftype))
 
-def generateYAMLDict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, oneTemplate=True, barcoded=False):
+def generate_exp_dict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, oneTemplate=True, barcoded=False):
     # get only fastq/fastq.gz filenames in current directory
     fileFnames = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith(('fastq', 'gz'))]
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     fSeqs = ['CATTGTCCCTAT','AGACCAAGTCTCTGCTACCGTA']
     peSeqs = [''] # why?
 
-    yDict = generateYAMLDict(fSeqs, sys.argv[2], peSeqs=peSeqs)
+    yDict = generate_exp_dict(fSeqs, sys.argv[2], peSeqs=peSeqs)
 
     # Write YAML file
     with open(sys.argv[1], 'w') as of:

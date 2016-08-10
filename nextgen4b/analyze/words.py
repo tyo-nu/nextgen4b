@@ -12,12 +12,6 @@ import re
 
 import matplotlib.pyplot as plt
 
-# Optional
-import seaborn as sbn
-sbn.set_style('white')
-sbn.set_palette('muted', 10)
-
-
 ############
 # Housekeeping
 ############
@@ -122,3 +116,5 @@ def create_rate_df(count_df, ignored_cols=['Time']):
     return rate_df, ci_df
 
 def average_replicate_dfs(df1, df2):
+    pass
+    # TODO

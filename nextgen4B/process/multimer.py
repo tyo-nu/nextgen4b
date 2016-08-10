@@ -10,9 +10,9 @@ incidence of nucleotides at each of the count sites.
 
 from Bio import SeqIO, Seq, SeqRecord
 import pandas as pd
+from tqdm import tqdm
 
 import sys, os, argparse
-import progressbar
     
 def extract_motifs_and_bases(f_name, mot_idxs, ct_idxs, bad_chars=['A','-']):
     """
@@ -142,12 +142,10 @@ if __name__ == '__main__':
                         default='counts')
     args = parser.parse_args(sys.argv[1:])
     
-    pb = progressbar.ProgressBar()
-    
     # Do work
     found_files = get_all_fnames(suffix='.fa')
     
-    for f in pb(found_files):
+    for f in tqdm(found_files):
         if args.outmode == 'meme':
             output_motif_lists(f, args.motifsites, args.countsites,
                                bad_chars=args.badchars, pad='AA')
