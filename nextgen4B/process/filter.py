@@ -10,11 +10,6 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Emboss.Applications import NeedleCommandline
 
-# TODO: Remove analysis code from this code.
-import nextgenanalyze as nga
-import ngsCSVAnalyze as csva
-import pandas as pd
-
 ## Setup Logging
 # I think we can remove this since it's in the init code.' 
 # timestr = time.strftime("%Y%m%d-%H%M%S")
