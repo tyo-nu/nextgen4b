@@ -1,6 +1,6 @@
 from Bio import SeqIO
 import yaml, sys, gzip
-from ..process.filter import loadNGSFileToIterator, getSeqCoords
+from ..process.filter import load_ngs_file, get_coords
 
 import logging, time
 
