@@ -1,8 +1,12 @@
-from Bio import SeqIO
-import yaml, sys, gzip
-from ..process.filter import load_ngs_file, get_coords
+import gzip
+import logging
+import sys
+import time
 
-import logging, time
+import yaml
+from Bio import SeqIO
+
+from ..process.filter import get_coords, load_ngs_file
 
 def demux_by_barcode(yfname, ffname, fsuffix='R1'):
     logging.info('Started forward sequence demuxing of '+ffname)
