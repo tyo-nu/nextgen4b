@@ -354,10 +354,10 @@ def run_all_experiments(yfname, save_intermediates=True):
         
         # Do filtering
         logging.info('Starting filtering for run %s' % run)
-        aln_seqs = ngf.filterSample(runs[run]['f_read_name'], runs[run]['pe_read_name'],
-                                    bcs, templates, 
-                                    runs[run]['filter_seqs']['forward'],
-                                    runs[run]['filter_seqs']['reverse'])
+        aln_seqs = filter_sample(runs[run]['f_read_name'], runs[run]['pe_read_name'],
+                                 bcs, templates, 
+                                 runs[run]['filter_seqs']['forward'],
+                                 runs[run]['filter_seqs']['reverse'])
         if save_intermediates:
             for expt in aln_seqs.keys():
                 with open('aln_seqs_%s_%s.fa' % (run, expt), 'w') as f:
