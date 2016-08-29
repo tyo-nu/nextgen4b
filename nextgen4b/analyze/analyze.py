@@ -3,8 +3,9 @@ import sys
 
 import numpy as np
 import pandas as pd
+import tqdm
 import yaml
-from Bio import AlignIO, SeqIO
+from Bio import SeqIO
 
 from ..process.filter import cull_alignments
 
@@ -13,7 +14,7 @@ from ..process.filter import cull_alignments
 # Dataframe creation and manipulation
 #####################
 
-def getPositionalMisinc(seqs, template, n, letterorder=['C', 'A', 'T', 'G']):
+def get_positional_misinc(seqs, template, n, letterorder=['C', 'A', 'T', 'G']):
     mat = np.zeros([len(letterorder), len(letterorder), len(seqs)])
     
     for i in range(len(seqs)):
@@ -22,16 +23,14 @@ def getPositionalMisinc(seqs, template, n, letterorder=['C', 'A', 'T', 'G']):
             
     return mat
 
-def getAllPositionMisincs(seqs, template, letterorder=['C', 'A', 'T', 'G']):
+def get_all_position_misincs(seqs, template, letterorder=['C', 'A', 'T', 'G']):
     mat = np.zeros([len(letterorder), len(letterorder), len(template)])
-    
     for i in range(len(template)):
-        posMat = getPositionalMisinc(seqs, template, i, letterorder=letterorder)
+        posMat = get_positional_misinc(seqs, template, i, letterorder=letterorder)
         mat[:,:,i] = np.sum(posMat, axis=2)
-    
     return mat
     
-def posMtoPandas(m, letterorder=['C', 'A', 'T', 'G']):
+def pos_mat_to_df(m, letterorder=['C', 'A', 'T', 'G']):
     # Generate column labels
     labels = []
     for i in range(len(letterorder)):
@@ -46,7 +45,7 @@ def posMtoPandas(m, letterorder=['C', 'A', 'T', 'G']):
     
     return df
     
-def addSequenceColumn(df, template):
+def add_sequence_column(df, template):
     tS = pd.Series(data=list(template), name='sequence', index=df.index)
     df['sequence'] = tS
     return df
@@ -55,34 +54,34 @@ def addSequenceColumn(df, template):
 # Main Routine Helper Functions
 ############
     
-def processNeedle(needleObj, tempSeq):
-    # filter based on alignment score.
-    seqs = cull_alignments(needleObj)    
-    return do_analysis(seqs, tempSeq)
-    
 def do_analysis(seqs, template):
-    logging.info('Started Analysis')
-    m = getAllPositionMisincs(seqs, template)
-    df = addSequenceColumn(posMtoPandas(m), template)
-    logging.info('Finished Analysis')
+    m = get_all_position_misincs(seqs, template)
+    df = add_sequence_column(pos_mat_to_df(m), template)
     return df
 
 ############
-# Main Routine
+# Main Routines
 ############
 
-def analyze_all_experiments():
-    
+def analyze_all_experiments(yf_name, data_dir='./'):
+    """
+    Given a folder of aligned fasta files from `filter`, output the old 
+    misinc_data.csv files, along with a summary .csv of misincorporations
+    at a given site.
+    """
+    with open(yf_name) as expt_f:
+        expt_yaml = yaml.load(expt_f) # Should probably make this a class at some point...
+    runs = expt_yaml['ngsruns']
+    for run in tqdm.tqdm(runs.keys()):
+        expts = runs[run]['experiments']
+        for expt in expts:
+            analyzed_data_fname = '%s_%s_misinc_data.csv' % (expt, run)
+            template = expt_yaml['experiments'][expt]['template_seq']
+            aln_seqs = list(SeqIO.parse('aln_seqs_%s_%s.fa' % (run, expt),
+                                        'fasta'))
+            data = do_analysis(aln_seqs, template)
+            
+            # Save dataframe
+            with open(analyzed_data_fname, 'w') as of:
+                data.to_csv(of)
 
-    # For each experiment in each run, do analysis
-    analyzed_data = {}
-    for expt in expts:
-        analyzed_data_fname = expt+'_'+run+'_misinc_data.csv'
-        # Get positional misincorporations
-        template = templates[expt]
-        analyzed_data[expt] = do_analysis(aln_seqs[expt], template)
-        
-        # Save dataframe
-        of = open(analyzed_data_fname, 'w')
-        analyzed_data[expt].to_csv(of)
-        of.close()

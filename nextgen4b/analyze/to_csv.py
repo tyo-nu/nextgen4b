@@ -25,7 +25,7 @@ def getExpRunData(fname):
     # (Experiment, Run)
     return (tokens[0], tokens[1])
 
-def getAllCsvFileNames(directory='.', csv_suffix='misinc_data.csv'):
+def get_csv_file_names(directory='.', csv_suffix='misinc_data.csv'):
     csv_fnames = [f for f in os.listdir(directory) if os.path.isfile(f) and f.endswith(csv_suffix)]
     return csv_fnames
     
@@ -54,7 +54,7 @@ def get_stats(df, cutoff=1):
     return simp_df
     
 def write_all_simple_misinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
-    csv_fnames = getAllCsvFileNames(directory=directory)
+    csv_fnames = get_csv_file_names(directory=directory)
     
     for fname in csv_fnames:
         df = pd.read_csv(fname, index_col=0)
@@ -103,7 +103,7 @@ def get_pos_stats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     
 def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
                      letterorder=['C', 'A', 'T', 'G']):
-    csv_fnames = getAllCsvFileNames(directory=directory)
+    csv_fnames = get_csv_file_names(directory=directory)
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
     
     # Set ids to be run first, then experiment
