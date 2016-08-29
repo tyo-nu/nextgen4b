@@ -1,12 +1,13 @@
+import logging
+import sys
+
 import numpy as np
 import pandas as pd
-
-import logging, sys
-
-from Bio import AlignIO
-from Bio import SeqIO
+import yaml
+from Bio import AlignIO, SeqIO
 
 from ..process.filter import cull_alignments
+
 
 #####################
 # Dataframe creation and manipulation
@@ -57,9 +58,9 @@ def addSequenceColumn(df, template):
 def processNeedle(needleObj, tempSeq):
     # filter based on alignment score.
     seqs = cull_alignments(needleObj)    
-    return doAnalysis(seqs, tempSeq)
+    return do_analysis(seqs, tempSeq)
     
-def doAnalysis(seqs, template):
+def do_analysis(seqs, template):
     logging.info('Started Analysis')
     m = getAllPositionMisincs(seqs, template)
     df = addSequenceColumn(posMtoPandas(m), template)
@@ -71,39 +72,17 @@ def doAnalysis(seqs, template):
 ############
 
 def analyze_all_experiments():
+    
+
     # For each experiment in each run, do analysis
     analyzed_data = {}
     for expt in expts:
         analyzed_data_fname = expt+'_'+run+'_misinc_data.csv'
-        if not os.path.isfile(analyzed_data_fname):
-            # Get positional misincorporations
-            template = templates[expt]
-            analyzed_data[expt] = nga.doAnalysis(aln_seqs[expt], template)
-            
-            # Save dataframe
-            of = open(analyzed_data_fname, 'w')
-            analyzed_data[expt].to_csv(of)
-            of.close()
-        else:
-            infile = open(analyzed_data_fname)
-            analyzed_data[expt] = pd.read_csv(infile)
-            infile.close()
-            logging.info('Found, loaded, pre-existing analysis file: '+ analyzed_data_fname)
+        # Get positional misincorporations
+        template = templates[expt]
+        analyzed_data[expt] = do_analysis(aln_seqs[expt], template)
         
-        # Do analysis
-        # ... not yet
-        logging.info('Finished analysis for experiment '+expt)
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        ofilen = sys.argv[1]
-    
-    alnData = AlignIO.parse(open(ofilen), "emboss")
-    tempData = list(SeqIO.parse(open('temptemplate.fa'), 'fasta'))[0]
-    
-    df = processNeedle(alnData, tempData)
-    of = open('_misinc_data.csv', 'w')
-    df.to_csv(of)
-    of.close()
-    
-    
+        # Save dataframe
+        of = open(analyzed_data_fname, 'w')
+        analyzed_data[expt].to_csv(of)
+        of.close()
