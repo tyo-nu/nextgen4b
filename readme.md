@@ -118,19 +118,7 @@ This file should adhere to YAML specs. Tricks and pain points have included:
 
 ### Performing analysis
 
-Nextgen_main.py usage:
-
-	python nextgen_main.py [samples.yaml]
-
-This will generate a whole bunch of .csv's, one for each experiment in each run. Each .csv should have information about the observed reads at each position on the template supplied in the **experiment** entry in the YAML file.
-
-You can then run
-
-	python ngsCSVanalyze.py [n]
-
-to get the summarized output for entry n for all of the .csv's in the directory.
-
-There is also code in ngsCSVanalyze.py to get full summaries for each experiment, but that's been disabled for now.
+Usage has changed a bit, full documentation coming.
 
 ## Author
 
