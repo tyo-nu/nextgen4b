@@ -1,9 +1,10 @@
-import sys, os
-import pandas as pd
-import numpy as np
-
-from statsmodels.stats import proportion
 import argparse
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+from statsmodels.stats import proportion
 
 ##############
 # Setup Arg Parser
@@ -20,7 +21,7 @@ parser.add_argument('--sum', dest='accumulate', action='store_const',
 # CSV Loading Routines
 ##############
    
-def getExpRunData(fname):
+def get_exp_run_data(fname):
     tokens = fname.split('_')
     # (Experiment, Run)
     return (tokens[0], tokens[1])
@@ -67,7 +68,7 @@ def write_all_simple_misinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
 
 def get_pos_stats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     # Get row of interest
-    data = df[[c for c in df.columns if not c == 'sequence']].iloc[nIdx]
+    data = df[[c for c in df.columns if not c == 'sequence' and not c == 'index']].iloc[nIdx]
     nt = df['sequence'].iloc[nIdx]
     total_n = float(data.sum())
     
@@ -107,7 +108,7 @@ def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
     
     # Set ids to be run first, then experiment
-    f_ids = ['.'.join(reversed([str(x) for x in getExpRunData(fname)])) for fname in csv_fnames]
+    f_ids = ['.'.join(reversed([str(x) for x in get_exp_run_data(fname)])) for fname in csv_fnames]
     
     # eeek this is a hack... wish there were a way to append using the correct columns
     # rather than just use .values and assume the columns are in the same order.
@@ -118,7 +119,8 @@ def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
     out_df = pd.DataFrame(index=sorted(f_ids), columns=cols)
     
     for fname, f_id in zip(csv_fnames, f_ids):
-        row = get_pos_stats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
+        row = get_pos_stats(pd.read_csv(fname, index_col=0),
+                            nIdx, expt=f_id, letterorder=letterorder)
         out_df.ix[f_id] = row.values
     
     out_df.to_csv(outfile)
