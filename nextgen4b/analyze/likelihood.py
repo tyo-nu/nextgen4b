@@ -10,7 +10,8 @@ from scipy.misc import logsumexp
 # Bootstrap and Pseudo-R2 Code
 #########################
 
-def load_words_to_array(fname, rare_base='A', discard_base='-'):
+def load_words_to_array(fname, rare_base='A',
+                        discard_base='-', del_as_misinc=False):
     """
     Return a KxM {0,1} array representing the M-length words contained in
     one of the word.txt files you've been using
@@ -18,8 +19,12 @@ def load_words_to_array(fname, rare_base='A', discard_base='-'):
     with open(fname) as i_f:
         txt_data = [line.strip() for line in i_f.readlines()
                     if discard_base not in line]
-
-    return np.array([np.where([c is rare_base for c in s], 0, 1)
+    
+    if del_as_misinc:
+        rare_base_list = [rare_base, 'd']
+    else:
+        rare_base_list = [rare_base]
+    return np.array([np.where([c in rare_base_list for c in s], 0, 1)
                      for s in txt_data])
 
 def load_controls_to_P(A_D_0, A_D_1):
