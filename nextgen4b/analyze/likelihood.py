@@ -340,3 +340,11 @@ def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
 
     ci = (srt_bootstrap_stats[Fstar_lo], srt_bootstrap_stats[Fstar_hi])
     return ci
+
+def model_softmax(L_D, S_list, P1, **kwargs):
+    """
+    Calculates softmax of models based on model likelihood
+    """
+    x = np.array([pop_log_lhood_fast(L_D, S, P1, **kwargs) for S in S_List])
+
+    return np.exp(x) / np.sum(np.exp(x), axis=0)
