@@ -12,7 +12,7 @@ def getRun(fname):
 
     return (sample_number, strand_number)
 
-def formatRun(f1, f2, fseqs, peseqs, expnames):
+def format_run(f1, f2, fseqs, peseqs, expnames):
     runDict = {}
     runDict['f_read_name'] = f1
     runDict['pe_read_name'] = f2
@@ -20,7 +20,7 @@ def formatRun(f1, f2, fseqs, peseqs, expnames):
     runDict['experiments'] = expnames
     return runDict
 
-def formatExpt(name, template, bc='', exp_dict={}):
+def format_expt(name, template, bc='', exp_dict={}):
     exptDict = {}
     exptDict['name'] = name
     exptDict['template_seq'] = str(template.seq)
@@ -28,7 +28,7 @@ def formatExpt(name, template, bc='', exp_dict={}):
     exptDict['exp_data'] = exp_dict
     return exptDict
 
-def loadTemplates(fname, ftype='fasta'):
+def load_templates(fname, ftype='fasta'):
     return list(SeqIO.parse(open(fname), ftype))
 
 def generate_exp_dict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, oneTemplate=True, barcoded=False):
@@ -44,12 +44,17 @@ def generate_exp_dict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, one
         else:
             runData[sample][strand] = f
 
-    templates = loadTemplates(templateFname)
+    templates = load_templates(templateFname)
 
     # Get formatted dictionary for each run/experiments
     runs = {}
     exps = {}
     for sample in runData.keys():
+        if 1 not in runData[sample]:
+            raise ValueError('Forward read of sample %i not present.' % sample)
+        if 2 not in runData[sample]:
+            raise ValueError('Paired-end read of sample %i not present.' % sample)
+        
         if oneExpPerSamp:
             # set up templates
             if oneTemplate:
@@ -60,8 +65,8 @@ def generate_exp_dict(fSeqs, templateFname, peSeqs=[''], oneExpPerSamp=True, one
             # set up run, experiment dictionaries
             runName = 'run'+str(sample)
             expName = 'exp'+str(sample)
-            runs[runName] = formatRun(runData[sample][1], runData[sample][2], fSeqs, peSeqs, [expName])
-            exps[expName] = formatExpt(expName, template)
+            runs[runName] = format_run(runData[sample][1], runData[sample][2], fSeqs, peSeqs, [expName])
+            exps[expName] = format_expt(expName, template)
 
     yamlDict = {}
     yamlDict['ngsruns'] = runs
