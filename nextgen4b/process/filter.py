@@ -327,7 +327,7 @@ def run_all_experiments(yf_name, save_intermediates=True):
     """
     Filters all sequences noted in the passed YAML file.
     """
-    # Start Logging
+    # Setup Loggers
     timestr = time.strftime("%Y%m%d-%H%M%S")
     logging.basicConfig(filename='ngs_'+timestr+'.log',
                         level=logging.DEBUG, format='%(asctime)s %(message)s')
