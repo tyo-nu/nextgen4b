@@ -298,7 +298,7 @@ def bootstr_ci_pseudo_r2(L_D, S1, S2, P1, P2=None,
     return ci
 
 def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
-                               alpha=0.05, n_iter=1000, samp_size=None,
+                               alpha=0.05, n_iter=1000,
                                verbose=False, **kwargs):
     """
     Does bootstrap for pseudo-r2. Gets significant speedups as we can
@@ -318,8 +318,6 @@ def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
 
     if not P2: # This might be better handled by *args...
         P2 = P1
-    if not samp_size:
-        samp_size = L_D.shape[0]
 
     if verbose:
         iterator = tqdm.tqdm(range(n_iter))
@@ -335,7 +333,7 @@ def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
     bootstrap_stats = np.zeros((n_iter))
 
     for i in iterator:
-        boot_idx = [np.random.randint(L_D.shape[0], size=(samp_size,1))
+        boot_idx = [np.random.randint(L_D.shape[0], size=(L_D.shape[0],1))
                     for L_D in L_D_list]
 
         bootstrap_stats[i] = 1 - (np.sum(logLs_1[resampled_idx].squeeze()) /
