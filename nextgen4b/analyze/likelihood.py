@@ -162,11 +162,16 @@ def all_log_lhood_fast(A_D, S, P, **kwargs):
 
 def pop_log_lhood_fast(A_D, S, P, **kwargs):
     """
-    Return the MAP log-likelihood of a population.
-
-    This is legacy code to work with the slow bootstrapping code.
+    Return the log-likelihood of a population, using a method in kwargs.
     """
     return np.sum(all_log_lhood_fast(A_D, S, P, **kwargs))
+
+def multi_pop_log_lhood_fast(l_A_D, S, P, **kwargs):
+    """
+    Return the log-likelihood of a multi-sample population.
+    """
+    return np.sum([np.sum(all_log_lhood_fast(A_D, S, P, **kwargs))
+                   for A_D in l_A_D])
 
 #########################
 # Bootstrap and Pseudo-R2 Code
