@@ -190,6 +190,19 @@ def rel_pseudo_r2_pop(L_D, S1, S2, P1, P2=None, **kwargs):
     
     return 1 - (logL_1/logL_2)
 
+def multi_rel_pseudo_r2_pop(L_D_list, S1, S2, P1, P2=None, **kwargs):
+    """
+    Return McFadden's Pseudo-R^2 (1-\frac{logL_S1}{logL_S2} 
+    of sequences under signal S1 over signal S2.   
+    """
+    if not P2:
+        P2 = P1
+    
+    logL_1 = multi_pop_log_lhood_fast(L_D_list, S1, P1, **kwargs)
+    logL_2 = multi_pop_log_lhood_fast(L_D_list, S2, P2, **kwargs)
+    
+    return 1 - (logL_1/logL_2)
+
 def bootstr_ci(func, X, alpha=0.05, args=None, kwargs=None,
                n_iter=1000, samp_size=None, verbose=False):
     if args and kwargs:
@@ -298,11 +311,15 @@ def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
     bootstrap_stats = np.zeros((n_iter))
 
     for i in iterator:
-        boot_idx = [np.random.randint(L_D.shape[0], size=(L_D.shape[0],1))
+        boot_idx = [np.random.randint(L_D.shape[0], size=(L_D.shape[0], 1))
                     for L_D in L_D_list]
 
-        bootstrap_stats[i] = 1 - (np.sum(logLs_1[resampled_idx].squeeze()) /
-                                  np.sum(logLs_2[resampled_idx].squeeze()))
+        boot_L1 = [np.sum(logL[bix].squeeze())
+                   for logL, bix in zip(logLs_1, boot_idx)]
+        boot_L2 = [np.sum(logL[bix].squeeze())
+                   for logL, bix in zip(logLs_2, boot_idx)]
+
+        bootstrap_stats[i] = 1 - (np.sum(boot_L1) / np.sum(boot_L2))
 
     srt_bootstrap_stats = np.sort(bootstrap_stats.squeeze())
 
