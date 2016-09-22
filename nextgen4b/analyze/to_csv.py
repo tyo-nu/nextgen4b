@@ -1,31 +1,21 @@
-import sys, os
-import pandas as pd
-import numpy as np
-
-from statsmodels.stats import proportion
 import argparse
+import os
+import sys
 
-##############
-# Setup Arg Parser
-##############
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('integers', metavar='N', type=int, nargs='+',
-                   help='an integer for the accumulator')
-parser.add_argument('--sum', dest='accumulate', action='store_const',
-                   const=sum, default=max,
-                   help='sum the integers (default: find the max)')
+import numpy as np
+import pandas as pd
+from statsmodels.stats import proportion
 
 ##############
 # CSV Loading Routines
 ##############
    
-def getExpRunData(fname):
+def get_exp_run_data(fname):
     tokens = fname.split('_')
     # (Experiment, Run)
     return (tokens[0], tokens[1])
 
-def getAllCsvFileNames(directory='.', csv_suffix='misinc_data.csv'):
+def get_csv_file_names(directory='.', csv_suffix='misinc_data.csv'):
     csv_fnames = [f for f in os.listdir(directory) if os.path.isfile(f) and f.endswith(csv_suffix)]
     return csv_fnames
     
@@ -54,7 +44,7 @@ def get_stats(df, cutoff=1):
     return simp_df
     
 def write_all_simple_misinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
-    csv_fnames = getAllCsvFileNames(directory=directory)
+    csv_fnames = get_csv_file_names(directory=directory)
     
     for fname in csv_fnames:
         df = pd.read_csv(fname, index_col=0)
@@ -67,7 +57,7 @@ def write_all_simple_misinc(directory='.', letterorder=['C', 'A', 'T', 'G']):
 
 def get_pos_stats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     # Get row of interest
-    data = df[[c for c in df.columns if not c == 'sequence']].iloc[nIdx]
+    data = df[[c for c in df.columns if not c == 'sequence' and not c == 'index']].iloc[nIdx]
     nt = df['sequence'].iloc[nIdx]
     total_n = float(data.sum())
     
@@ -103,11 +93,11 @@ def get_pos_stats(df, nIdx, cutoff=1, expt=1, letterorder=['C', 'A', 'T', 'G']):
     
 def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
                      letterorder=['C', 'A', 'T', 'G']):
-    csv_fnames = getAllCsvFileNames(directory=directory)
+    csv_fnames = get_csv_file_names(directory=directory)
     # expts = [int(getExpRunData(fname)[0][3:]) for fname in csv_fnames]
     
     # Set ids to be run first, then experiment
-    f_ids = ['.'.join(reversed([str(x) for x in getExpRunData(fname)])) for fname in csv_fnames]
+    f_ids = ['.'.join(reversed([str(x) for x in get_exp_run_data(fname)])) for fname in csv_fnames]
     
     # eeek this is a hack... wish there were a way to append using the correct columns
     # rather than just use .values and assume the columns are in the same order.
@@ -116,25 +106,16 @@ def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
     cols = [x+'_'+out for x in ntCols for out in outsCols] + ['total_n', 'sequence']
     
     out_df = pd.DataFrame(index=sorted(f_ids), columns=cols)
-    
+   
     for fname, f_id in zip(csv_fnames, f_ids):
-        row = get_pos_stats(pd.read_csv(fname), nIdx, expt=f_id, letterorder=letterorder)
+        row = get_pos_stats(pd.read_csv(fname, index_col=0),
+                            nIdx, expt=f_id, letterorder=letterorder)
         out_df.ix[f_id] = row.values
+
+    # Sort by experiment number
+    # NOTE: this is hard-coded for 
+    out_df['sort_col'] = out_df.index.map(lambda x: int(x.split('.')[0][3:]))
+    out_df.sort_values('sort_col', inplace=True)
+    out_df.drop('sort_col', axis=1, inplace=True)
     
     out_df.to_csv(outfile)
-
-#####################
-# Main Routine
-#####################
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Gets error breakdown for all conditions at a given site.')
-    parser.add_argument('idx', nargs=1, type=int, metavar='I',
-                        help='Site to examine for misincorporations')
-    parser.add_argument('-o', '--outfile', type=str, metavar='O',
-                        help='Where to output the data',
-                        default='summary_all.csv')   
-    args = parser.parse_args()
-    
-    write_all_pos_stats(args.idx, outfile=args.outfile)

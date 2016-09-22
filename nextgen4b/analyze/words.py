@@ -114,7 +114,3 @@ def create_rate_df(count_df, ignored_cols=['Time']):
     ci_df = create_confint_df(count_df, ignored_cols=ignored_cols)
 
     return rate_df, ci_df
-
-def average_replicate_dfs(df1, df2):
-    pass
-    # TODO
