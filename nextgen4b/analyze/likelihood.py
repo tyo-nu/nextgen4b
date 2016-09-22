@@ -262,41 +262,6 @@ def bootstr_ci_pseudo_r2(L_D, S1, S2, P1, P2=None,
     ci = (srt_bootstrap_stats[Fstar_lo], srt_bootstrap_stats[Fstar_hi])
     return ci
 
-def bootstr_ci_pseudo_r2(L_D, S1, S2, P1, P2=None,
-                         alpha=0.05, n_iter=1000, samp_size=None,
-                         verbose=False, **kwargs):
-    """
-    Does bootstrap for pseudo-r2. Gets significant speedups as we can precompute the 
-    log-likelihood of all the sequences first, then just bootstrap over the sum.
-    """
-    if not P2: # This might be better handled by *args...
-        P2 = P1
-    if not samp_size:
-        samp_size = L_D.shape[0]
-
-    if verbose:
-        iterator = tqdm.tqdm(range(n_iter))
-    else:
-        iterator = range(n_iter)
-
-    Fstar_lo, Fstar_hi = np.floor(n_iter * np.array([alpha/2., 1-alpha/2.])).astype(int)
-
-    # Pre-calculate log-likelihoods
-    logLs_1 = all_log_lhood_fast(L_D, S1, P1, **kwargs)
-    logLs_2 = all_log_lhood_fast(L_D, S2, P2, **kwargs)
-
-    bootstrap_stats = np.zeros((n_iter))
-
-    for i in iterator:
-        resampled_idx = np.random.randint(L_D.shape[0], size=(samp_size,1))
-        bootstrap_stats[i] = 1 - (np.sum(logLs_1[resampled_idx].squeeze()) /
-                                  np.sum(logLs_2[resampled_idx].squeeze()))
-
-    srt_bootstrap_stats = np.sort(bootstrap_stats.squeeze())
-
-    ci = (srt_bootstrap_stats[Fstar_lo], srt_bootstrap_stats[Fstar_hi])
-    return ci
-
 def multi_bootstr_ci_pseudo_r2(L_D_list, S1, S2, P1, P2=None,
                                alpha=0.05, n_iter=1000,
                                verbose=False, **kwargs):
