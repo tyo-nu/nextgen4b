@@ -106,10 +106,16 @@ def write_all_pos_stats(nIdx, directory='.', outfile='summary_all.csv',
     cols = [x+'_'+out for x in ntCols for out in outsCols] + ['total_n', 'sequence']
     
     out_df = pd.DataFrame(index=sorted(f_ids), columns=cols)
-    
+   
     for fname, f_id in zip(csv_fnames, f_ids):
         row = get_pos_stats(pd.read_csv(fname, index_col=0),
                             nIdx, expt=f_id, letterorder=letterorder)
         out_df.ix[f_id] = row.values
+
+    # Sort by experiment number
+    # NOTE: this is hard-coded for 
+    out_df['sort_col'] = out_df.index.map(lambda x: int(x.split('.')[0][3:]))
+    out_df.sort_values('sort_col', inplace=True)
+    out_df.drop('sort_col', axis=1, inplace=True)
     
     out_df.to_csv(outfile)
