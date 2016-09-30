@@ -19,7 +19,7 @@ def load_words_to_array(fname, rare_base='A',
     with open(fname) as i_f:
         txt_data = [line.strip() for line in i_f.readlines()
                     if discard_base not in line]
-    
+
     if del_as_misinc:
         rare_base_list = [rare_base, 'd']
     else:
@@ -27,7 +27,11 @@ def load_words_to_array(fname, rare_base='A',
     return np.array([np.where([c in rare_base_list for c in s], 0, 1)
                      for s in txt_data])
 
-def load_controls_to_P(A_D_0, A_D_1):
+def load_controls(A_D_0, A_D_1):
+    """
+    Given word arrays for the 0 and 1 condition (A_D_0, A_D_1), returns
+    an array suitable for use as the control array in likelihood functions.
+    """
     p1 = np.sum(A_D_0, axis=0) / float(A_D_0.shape[0])
     p2 = np.sum(A_D_1, axis=0) / float(A_D_1.shape[0])
 
