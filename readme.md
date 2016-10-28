@@ -45,7 +45,7 @@ Then follow the instructions to install biopython.
 
 	python setup.py build
 	python setup.py test
-	python setup.py develop
+	python setup.py install
 
 Alternatively, you can directly modify the AlignIO code in your existing installation of biopython. Hopefully this will be resolved in a new release of biopython.
 
