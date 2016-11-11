@@ -104,7 +104,7 @@ def seq_log_lhood(D, S, L_I, P, prior=None, method='map'):
     Output:
         ll - The maximum log-likelihood of the strand given S, I, and P
     """
-    if not prior: # i.e. it's uniform
+    if prior is None: # i.e. it's uniform
         prior = np.ones(len(L_I), dtype=float) / len(L_I)
 
     if method is 'map':

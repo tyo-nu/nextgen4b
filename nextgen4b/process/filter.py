@@ -113,7 +113,7 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
             bc_seqs[expt] = seqs
         csv_data.append(len(seqs))
 
-        csv_logger.info(','.join(csv_data))
+        csv_logger.info(','.join([str(n) for n in csv_data]))
         bc_seqs[expt] = seqs
 
     return bc_seqs
