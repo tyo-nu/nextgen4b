@@ -215,9 +215,9 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
     matched_seq_list = []
 
     # Get coordinate list
-    pe_coordL = [get_coords(s) for s in pe_seqs]
+    pe_coord_list = [get_coords(s) for s in pe_seqs]
     for s in f_seqs:
-        if pe_coordL.count(get_coords(s)): # Filter based on paired-end presence
+        if get_coords(s) in pe_coord_list: # Filter based on paired-end presence
             co_ct += 1
             copied = copied_func(s) # Get the part of the sequence that was actually copied
             if str(pe_seqs[0].reverse_complement().seq).find(str(copied.seq)): # Filter on PE match
@@ -254,7 +254,7 @@ def quality_filter(seqs, q_cutoff=20):
 # Length Filtering
 #####################
 
-def len_filter(seqs, l_cutoff=70, u_cutoff=200, l_barcode=0):
+def len_filter(seqs, l_cutoff=60, u_cutoff=200, l_barcode=0):
     """
     Return only sequence objects that have length between l_cutoff and
     u_cutoff
