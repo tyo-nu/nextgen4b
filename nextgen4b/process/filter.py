@@ -92,8 +92,9 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
             bc_seqs[expt] = seqs
         csv_data.append(len(seqs))
 
-        seqs = strip_forward_barcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
-        csv_data.append(len(seqs))
+        # PROPOSED DELETE: Barcodes come before our extension primer!
+        # seqs = strip_forward_barcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
+        # csv_data.append(len(seqs))
 
         # Align filter
         if len(seqs) > 0:
@@ -272,7 +273,7 @@ def len_filter(seqs, l_cutoff=60, u_cutoff=200, l_barcode=0):
 #####################
 
 def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
-                     hi_cutoff=1000, cleanup=True):
+                     hi_cutoff=1000, cleanup=False):
     text_logger = logging.getLogger(__name__+'.text_logger')
     text_logger.info('Started alignment-based filtering')
     start_n_seqs = len(seqs)
