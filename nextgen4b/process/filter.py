@@ -32,9 +32,9 @@ def load_ngs_file(fpath, ftype='fastq'):
     Load a .fastq file to a SeqIO iterator, un-gzip if necessary.
     """
     if fpath.endswith('.gz'):
-        seq_f = gzip.open(fpath, 'rb')
+        seq_f = gzip.open(fpath, 'rt')
     elif fpath.endswith('.fastq'):
-        seq_f = open(fpath, 'rb')
+        seq_f = open(fpath, 'rt')
     else:
         raise ValueError('File does not end in .gz or .fastq; confirm file type.')
     f_iter = SeqIO.parse(seq_f, ftype)
