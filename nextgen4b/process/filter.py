@@ -83,6 +83,8 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
                                   gen_copied_seq_function(f_res))
         csv_data.append(len(seqs))
 
+        seqs = trim_lig_adapter(seqs, f_res) # Trim CS2 before filtering on quality (bad Qs at end of seqs)
+
         # Quality filter
         if len(seqs) > 0:
             seqs = quality_filter(seqs) # Quality Filtering (needs to only have copied sequence)
@@ -180,6 +182,9 @@ def get_sense(s):
 def get_copied_seq(s, f_res):
     return s[f_res[0].search(str(s.seq)).end():list(f_res[1].finditer(str(s.seq)))[-1].start()]
 
+def trim_lig_adapter(s, f_res):
+    return s[:list(f_res[1].finditer(str(s.seq)))[-1].start()]
+
 def gen_copied_seq_function(f_res):
     return lambda s: get_copied_seq(s, f_res)
 
@@ -215,7 +220,7 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
             copied = copied_func(s) # Get the part of the sequence that was actually copied
             if str(pe_seqs[0].reverse_complement().seq).find(str(copied.seq)): # Filter on PE match
                 aln_ct += 1
-                matched_seq_list.append(s) # Keep the full sequence (not just the copied one)
+                matched_seq_list.append(s)
 
         proc_ct += 1
         if not (proc_ct % 5000):
