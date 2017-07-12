@@ -94,7 +94,9 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
 
         # Align filter
         if len(seqs) > 0:
-            seqs = alignment_filter(seqs, templates[expt]) # Do alignment-based filtering
+            # Do alignment-based filtering
+            seqs = alignment_filter(seqs,
+                                    '{}{}'.format(bcs[expt], templates[expt])) # Do alignment-based filtering
         else:
             text_logger.info("""No sequences left, skipped align filtering for
                              expt ID %s.***""", expt)
@@ -195,8 +197,6 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
     Outputs a list of forward sequences that pass two filters:
         * Have a coordinate match in the paired end reads
         * That coordinate match has the same sequence.
-
-    Prunes the sequences down to what was actually copied (i.e. pre-adapter)
     """
     text_logger = logging.getLogger(__name__+'.text_logger')
     text_logger.info('Started Paired-End Filtering')
@@ -215,7 +215,7 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
             copied = copied_func(s) # Get the part of the sequence that was actually copied
             if str(pe_seqs[0].reverse_complement().seq).find(str(copied.seq)): # Filter on PE match
                 aln_ct += 1
-                matched_seq_list.append(copied)
+                matched_seq_list.append(s) # Keep the full sequence (not just the copied one)
 
         proc_ct += 1
         if not (proc_ct % 5000):
