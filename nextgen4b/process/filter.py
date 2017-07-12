@@ -92,10 +92,6 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
             bc_seqs[expt] = seqs
         csv_data.append(len(seqs))
 
-        # PROPOSED DELETE: Barcodes come before our extension primer!
-        # seqs = strip_forward_barcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
-        # csv_data.append(len(seqs))
-
         # Align filter
         if len(seqs) > 0:
             seqs = alignment_filter(seqs, templates[expt]) # Do alignment-based filtering
@@ -148,10 +144,6 @@ def compile_res(seqs):
 #####################
 # Barcode Filtering
 #####################
-
-# Need to do this before alignment.
-def strip_forward_barcodes(f_seqs, l_barcode=5):
-    return [s[l_barcode:] for s in f_seqs]
 
 def barcodeDemux(seqs, bcs):
     """
