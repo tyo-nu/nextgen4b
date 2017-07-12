@@ -83,7 +83,7 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
                                   gen_copied_seq_function(f_res))
         csv_data.append(len(seqs))
 
-        seqs = trim_lig_adapter(seqs, f_res) # Trim CS2 before filtering on quality (bad Qs at end of seqs)
+        seqs = [trim_lig_adapter(s, f_res) for s in seqs] # Trim CS2 before filtering on quality (bad Qs at end of seqs)
 
         # Quality filter
         if len(seqs) > 0:
@@ -97,8 +97,8 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
         # Align filter
         if len(seqs) > 0:
             # Do alignment-based filtering
-            seqs = alignment_filter(seqs,
-                                    '{}{}'.format(bcs[expt], templates[expt])) # Do alignment-based filtering
+            full_template = '{}{}'.format(bcs[expt], templates[expt])
+            seqs = alignment_filter(seqs, full_template) # Do alignment-based filtering
         else:
             text_logger.info("""No sequences left, skipped align filtering for
                              expt ID %s.***""", expt)
@@ -277,23 +277,17 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=0,
 
     # Save the template and sequences as temporary fasta files
     # Probably some hacking that can be done in the NeedleCommandline stuff
-    template_f_name = 'temptemplate.fa'
     seqs_f_name = 'tempseq.fa'
 
     with open(seqs_f_name, 'w') as sh:
         SeqIO.write(seqs, sh, 'fastq')
-
-    with open(template_f_name, 'w') as temp_seq_file:
-        # Make temp sequence file for alignment
-        temp_seq = SeqRecord(Seq(template), id='template', name='template')
-        SeqIO.write(temp_seq, temp_seq_file, 'fasta')
 
     # Generate alignment command, run the alignment
     text_logger.info("""Began EMBOSS needle routine with settings:\ngapopen:
                     %i\ngapextend: %i\nlo_cutoff: %i\nhi_cutoff: %i""",
                  gapopen, gapextend, lo_cutoff, hi_cutoff)
     ofilen = 'temp_'+str(uuid.uuid4())+'.needle'
-    needle_cline = NeedleCommandline(asequence=template_f_name,
+    needle_cline = NeedleCommandline(asequence='asis::{}'.format(template),
                                      bsequence=seqs_f_name, gapopen=gapopen,
                                      gapextend=gapextend, outfile=ofilen)
     needle_cline()
@@ -306,7 +300,6 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=0,
     # Exit routine
     if cleanup:
         text_logger.info('Cleaning up temp files')
-        os.remove(template_f_name)
         os.remove(seqs_f_name)
         os.remove(ofilen)
     text_logger.info("""Finished alignment-based filtering. Kept %i of %i
