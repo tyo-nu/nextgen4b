@@ -255,7 +255,7 @@ def quality_filter(seqs, q_cutoff=20):
 # Length Filtering
 #####################
 
-def len_filter(seqs, l_cutoff=60, u_cutoff=200, l_barcode=0):
+def len_filter(seqs, l_cutoff=40, u_cutoff=200, l_barcode=0):
     """
     Return only sequence objects that have length between l_cutoff and
     u_cutoff
@@ -272,7 +272,7 @@ def len_filter(seqs, l_cutoff=60, u_cutoff=200, l_barcode=0):
 # Alignment Filtering
 #####################
 
-def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
+def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=0,
                      hi_cutoff=1000, cleanup=True):
     text_logger = logging.getLogger(__name__+'.text_logger')
     text_logger.info('Started alignment-based filtering')
