@@ -252,7 +252,7 @@ def quality_filter(seqs, q_cutoff=20):
 # Length Filtering
 #####################
 
-def len_filter(seqs, l_cutoff=40, u_cutoff=200, l_barcode=0):
+def len_filter(seqs, l_cutoff=70, u_cutoff=150, l_barcode=0):
     """
     Return only sequence objects that have length between l_cutoff and
     u_cutoff
@@ -307,7 +307,7 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
     return new_seqs
 
 
-def cull_alignments(aln_data, lo_cutoff=400, hi_cutoff=650):
+def cull_alignments(aln_data, lo_cutoff=300, hi_cutoff=650):
     new_seqs = []
 
     for alignment in aln_data:
