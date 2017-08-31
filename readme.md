@@ -38,9 +38,16 @@ For this code to run correctly, you need a modified AlignIO module that reads th
 In order to install and modify biopython, you can do the following:
 
     git clone https://github.com/tcyb/biopython
-    git reset d980d67d34329312174728427273f8ca063ca4aa
+    cd biopython
+    git checkout d980d67d34329312174728427273f8ca063ca4aa
 
-Then follow the instructions to install biopython. Alternatively, you can directly modify the AlignIO code in your existing installation of biopython. Hopefully this will be resolved in a new version of the biopython code.
+Then follow the instructions to install biopython.
+
+	python setup.py build
+	python setup.py test
+	python setup.py install
+
+Alternatively, you can directly modify the AlignIO code in your existing installation of biopython. Hopefully this will be resolved in a new release of biopython.
 
 ## Usage
 
