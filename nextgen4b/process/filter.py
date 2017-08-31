@@ -32,9 +32,9 @@ def load_ngs_file(fpath, ftype='fastq'):
     Load a .fastq file to a SeqIO iterator, un-gzip if necessary.
     """
     if fpath.endswith('.gz'):
-        seq_f = gzip.open(fpath, 'rb')
+        seq_f = gzip.open(fpath, 'rt')
     elif fpath.endswith('.fastq'):
-        seq_f = open(fpath, 'rb')
+        seq_f = open(fpath, 'rt')
     else:
         raise ValueError('File does not end in .gz or .fastq; confirm file type.')
     f_iter = SeqIO.parse(seq_f, ftype)
@@ -83,6 +83,8 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
                                   gen_copied_seq_function(f_res))
         csv_data.append(len(seqs))
 
+        seqs = [trim_lig_adapter(s, f_res) for s in seqs] # Trim CS2 before filtering on quality (bad Qs at end of seqs)
+
         # Quality filter
         if len(seqs) > 0:
             seqs = quality_filter(seqs) # Quality Filtering (needs to only have copied sequence)
@@ -92,12 +94,11 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
             bc_seqs[expt] = seqs
         csv_data.append(len(seqs))
 
-        seqs = strip_forward_barcodes(seqs, l_barcode=len(bcs[expt])) # Remove barcodes before align
-        csv_data.append(len(seqs))
-
         # Align filter
         if len(seqs) > 0:
-            seqs = alignment_filter(seqs, templates[expt]) # Do alignment-based filtering
+            # Do alignment-based filtering
+            full_template = '{}{}'.format(bcs[expt], templates[expt])
+            seqs = alignment_filter(seqs, full_template) # Do alignment-based filtering
         else:
             text_logger.info("""No sequences left, skipped align filtering for
                              expt ID %s.***""", expt)
@@ -113,7 +114,7 @@ def filter_sample(f_name, pe_name, bcs, templates, f_filt_seqs, r_filt_seqs):
             bc_seqs[expt] = seqs
         csv_data.append(len(seqs))
 
-        csv_logger.info(','.join(csv_data))
+        csv_logger.info(','.join([str(n) for n in csv_data]))
         bc_seqs[expt] = seqs
 
     return bc_seqs
@@ -148,10 +149,6 @@ def compile_res(seqs):
 # Barcode Filtering
 #####################
 
-# Need to do this before alignment.
-def strip_forward_barcodes(f_seqs, l_barcode=5):
-    return [s[l_barcode:] for s in f_seqs]
-
 def barcodeDemux(seqs, bcs):
     """
     Takes lists of sequence objects, dict of barcodes (indexed by expt. ID)
@@ -185,6 +182,9 @@ def get_sense(s):
 def get_copied_seq(s, f_res):
     return s[f_res[0].search(str(s.seq)).end():list(f_res[1].finditer(str(s.seq)))[-1].start()]
 
+def trim_lig_adapter(s, f_res):
+    return s[:list(f_res[1].finditer(str(s.seq)))[-1].start()]
+
 def gen_copied_seq_function(f_res):
     return lambda s: get_copied_seq(s, f_res)
 
@@ -202,8 +202,6 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
     Outputs a list of forward sequences that pass two filters:
         * Have a coordinate match in the paired end reads
         * That coordinate match has the same sequence.
-
-    Prunes the sequences down to what was actually copied (i.e. pre-adapter)
     """
     text_logger = logging.getLogger(__name__+'.text_logger')
     text_logger.info('Started Paired-End Filtering')
@@ -215,14 +213,14 @@ def filter_pe_mismatch(f_seqs, pe_seqs, copied_func):
     matched_seq_list = []
 
     # Get coordinate list
-    pe_coordL = [get_coords(s) for s in pe_seqs]
+    pe_coord_list = [get_coords(s) for s in pe_seqs]
     for s in f_seqs:
-        if pe_coordL.count(get_coords(s)): # Filter based on paired-end presence
+        if get_coords(s) in pe_coord_list: # Filter based on paired-end presence
             co_ct += 1
             copied = copied_func(s) # Get the part of the sequence that was actually copied
             if str(pe_seqs[0].reverse_complement().seq).find(str(copied.seq)): # Filter on PE match
                 aln_ct += 1
-                matched_seq_list.append(copied)
+                matched_seq_list.append(s)
 
         proc_ct += 1
         if not (proc_ct % 5000):
@@ -254,7 +252,7 @@ def quality_filter(seqs, q_cutoff=20):
 # Length Filtering
 #####################
 
-def len_filter(seqs, l_cutoff=70, u_cutoff=200, l_barcode=0):
+def len_filter(seqs, l_cutoff=70, u_cutoff=150, l_barcode=0):
     """
     Return only sequence objects that have length between l_cutoff and
     u_cutoff
@@ -279,23 +277,17 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
 
     # Save the template and sequences as temporary fasta files
     # Probably some hacking that can be done in the NeedleCommandline stuff
-    template_f_name = 'temptemplate.fa'
     seqs_f_name = 'tempseq.fa'
 
     with open(seqs_f_name, 'w') as sh:
         SeqIO.write(seqs, sh, 'fastq')
-
-    with open(template_f_name, 'w') as temp_seq_file:
-        # Make temp sequence file for alignment
-        temp_seq = SeqRecord(Seq(template), id='template', name='template')
-        SeqIO.write(temp_seq, temp_seq_file, 'fasta')
 
     # Generate alignment command, run the alignment
     text_logger.info("""Began EMBOSS needle routine with settings:\ngapopen:
                     %i\ngapextend: %i\nlo_cutoff: %i\nhi_cutoff: %i""",
                  gapopen, gapextend, lo_cutoff, hi_cutoff)
     ofilen = 'temp_'+str(uuid.uuid4())+'.needle'
-    needle_cline = NeedleCommandline(asequence=template_f_name,
+    needle_cline = NeedleCommandline(asequence='asis::{}'.format(template),
                                      bsequence=seqs_f_name, gapopen=gapopen,
                                      gapextend=gapextend, outfile=ofilen)
     needle_cline()
@@ -308,7 +300,6 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
     # Exit routine
     if cleanup:
         text_logger.info('Cleaning up temp files')
-        os.remove(template_f_name)
         os.remove(seqs_f_name)
         os.remove(ofilen)
     text_logger.info("""Finished alignment-based filtering. Kept %i of %i
@@ -316,7 +307,7 @@ def alignment_filter(seqs, template, gapopen=10, gapextend=0.5, lo_cutoff=300,
     return new_seqs
 
 
-def cull_alignments(aln_data, lo_cutoff=400, hi_cutoff=650):
+def cull_alignments(aln_data, lo_cutoff=300, hi_cutoff=650):
     new_seqs = []
 
     for alignment in aln_data:

@@ -52,16 +52,24 @@ def extract_motifs_and_bases(f_name, mot_idxs, ct_idxs, bad_chars=['A','-']):
 ############
 
 def gen_mot_counts_df(mot, nts, ct_idxs, letter_order=['C','G','T','A']):
+    """
+    Generate dataframe listing number of base incorporations for each motif.
+
+    Inputs:
+    - mot: list of motifs present in the sample
+    - nts: list of incorporations present in the sample
+    - ct_idxs: list of sites where the bases in `nts` were taken from
+    """
     unique_mots = list(set(mot))
     mot_cts = [mot.count(m) for m in unique_mots]
     
     # Build df
     df = pd.DataFrame({'motif': unique_mots, 'total': mot_cts})
-    for c_idx, i in zip(ct_idxs, range(len(ct_idxs))):
-        site_letters = [l[i] for l in ct_nts] # Letters at each site
+    for i, c_idx in enumerate(ct_idxs):
+        site_letters = [l[i] for l in nts] # Letters at each site
         for letter in letter_order:
             # Get desired letter count for each motif
-            site_mot_ct = [[site_letters[i] for i in range(len(mot)) \
+            site_mot_ct = [[site_letters[i] for i in range(len(mot))
                             if mot[i] == m].count(letter) for m in unique_mots]
             df['%s_%i_counts' % (letter, c_idx)] = site_mot_ct
     

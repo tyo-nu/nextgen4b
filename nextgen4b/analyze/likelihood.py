@@ -10,16 +10,17 @@ from scipy.misc import logsumexp
 # Bootstrap and Pseudo-R2 Code
 #########################
 
-def load_words_to_array(fname, rare_base='A',
+def load_words_to_array(i_f, rare_base='A',
                         discard_base='-', del_as_misinc=False):
     """
+    Input a word file object.
+    
     Return a KxM {0,1} array representing the M-length words contained in
     one of the word.txt files you've been using
     """
-    with open(fname) as i_f:
-        txt_data = [line.strip() for line in i_f.readlines()
-                    if discard_base not in line]
-    
+    txt_data = [line.strip() for line in i_f.readlines()
+                if discard_base not in line]
+
     if del_as_misinc:
         rare_base_list = [rare_base, 'd']
     else:
@@ -27,7 +28,11 @@ def load_words_to_array(fname, rare_base='A',
     return np.array([np.where([c in rare_base_list for c in s], 0, 1)
                      for s in txt_data])
 
-def load_controls_to_P(A_D_0, A_D_1):
+def load_controls(A_D_0, A_D_1):
+    """
+    Given word arrays for the 0 and 1 condition (A_D_0, A_D_1), returns
+    an array suitable for use as the control array in likelihood functions.
+    """
     p1 = np.sum(A_D_0, axis=0) / float(A_D_0.shape[0])
     p2 = np.sum(A_D_1, axis=0) / float(A_D_1.shape[0])
 
@@ -100,7 +105,7 @@ def seq_log_lhood(D, S, L_I, P, prior=None, method='map'):
     Output:
         ll - The maximum log-likelihood of the strand given S, I, and P
     """
-    if not prior: # i.e. it's uniform
+    if prior is None: # i.e. it's uniform
         prior = np.ones(len(L_I), dtype=float) / len(L_I)
 
     if method is 'map':
